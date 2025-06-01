@@ -1,5 +1,3 @@
-package dominio;
-
 import java.io.Serializable;
 
 public class ClienteMensual implements Serializable {
