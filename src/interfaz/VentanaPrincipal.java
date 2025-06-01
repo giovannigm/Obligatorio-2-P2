@@ -7,6 +7,7 @@ public class VentanaPrincipal extends JFrame {
     private JTabbedPane pestañas;
     private JPanel panelModo;
     private VentanaClientes ventanaClientes;
+    private VentanaVehiculos ventanaVehiculos;
 
     public VentanaPrincipal() {
         setTitle("Obligatorio Prog 2 - Autor: Giovanni 288127, Nicolas 258264");
@@ -33,6 +34,9 @@ public class VentanaPrincipal extends JFrame {
         if (ventanaClientes != null) {
             ventanaClientes.setModoOscuro(!modoOscuro);
         }
+        if (ventanaVehiculos != null) {
+            ventanaVehiculos.setModoOscuro(!modoOscuro);
+        }
         modoOscuro = !modoOscuro;
     }
 
@@ -43,7 +47,9 @@ public class VentanaPrincipal extends JFrame {
         // Barra de pestañas arriba
         pestañas = new JTabbedPane();
         ventanaClientes = new VentanaClientes(modoOscuro);
-        pestañas.addTab("Gestión", ventanaClientes);
+        ventanaVehiculos = new VentanaVehiculos(modoOscuro);
+        pestañas.addTab("Clientes", ventanaClientes);
+        pestañas.addTab("Vehículos", ventanaVehiculos);
         pestañas.addTab("Movimientos", new JPanel());
         pestañas.addTab("Varios", new JPanel());
         pestañas.addTab("Terminal", new JPanel());
