@@ -2,6 +2,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class DatosSistema implements Serializable {
+  private static DatosSistema instancia;
   private ArrayList<ClienteMensual> clientes;
   private ArrayList<Vehiculo> vehiculos;
   private ArrayList<Empleado> empleados;
@@ -10,7 +11,7 @@ public class DatosSistema implements Serializable {
   private ArrayList<Salida> salidas;
   private ArrayList<ServicioAdicional> servicios;
 
-  public DatosSistema() {
+  private DatosSistema() {
     this.clientes = new ArrayList<>();
     this.vehiculos = new ArrayList<>();
     this.empleados = new ArrayList<>();
@@ -18,6 +19,13 @@ public class DatosSistema implements Serializable {
     this.entradas = new ArrayList<>();
     this.salidas = new ArrayList<>();
     this.servicios = new ArrayList<>();
+  }
+
+  public static DatosSistema getInstancia() {
+    if (instancia == null) {
+      instancia = new DatosSistema();
+    }
+    return instancia;
   }
 
   // Getters y Setters
