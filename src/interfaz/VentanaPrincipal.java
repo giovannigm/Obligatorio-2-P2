@@ -7,6 +7,7 @@ public class VentanaPrincipal extends JFrame {
     private JPanel panelPrincipal;
     private JButton btnModo;
     private JMenu menuGestion, menuMov, menuVarios, menuTerminar;
+    private JMenuItem itemGestionVehiculos, itemGestionClientes;
 
     public VentanaPrincipal() {
         try {
@@ -15,7 +16,7 @@ public class VentanaPrincipal extends JFrame {
             ex.printStackTrace();
         }
 
-        setTitle("Obligatorio Prog 2 - Autor: Estudiante - Número");
+        setTitle("Obligatorio Prog 2 - Autor: Giovanni - 288127,  Nicolas - 258264");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -33,8 +34,10 @@ public class VentanaPrincipal extends JFrame {
 
         // Menú Gestión
         menuGestion = new JMenu("Gestión");
-        menuGestion.add(new JMenuItem("Gestión de Clientes"));
-        menuGestion.add(new JMenuItem("Gestión de Vehículos"));
+        itemGestionClientes = new JMenuItem("Gestión de Clientes");
+        menuGestion.add(itemGestionClientes);
+        itemGestionVehiculos = new JMenuItem("Gestión de Vehículos");
+        menuGestion.add(itemGestionVehiculos);
         menuGestion.add(new JMenuItem("Gestión de Empleados"));
         menuGestion.add(new JMenuItem("Gestión de Contratos"));
 
@@ -54,7 +57,8 @@ public class VentanaPrincipal extends JFrame {
 
         // Menú Terminar
         menuTerminar = new JMenu("Terminar");
-        menuTerminar.add(new JMenuItem("Salir"));
+        JMenuItem itemSalir = new JMenuItem("Salir");
+        menuTerminar.add(itemSalir);
 
         menuBar.add(menuGestion);
         menuBar.add(menuMov);
@@ -62,6 +66,36 @@ public class VentanaPrincipal extends JFrame {
         menuBar.add(menuTerminar);
 
         setJMenuBar(menuBar);
+
+        // Listener para abrir VentanaClientes en una ventana aparte
+        itemGestionClientes.addActionListener(e -> {
+            JFrame frameClientes = new JFrame("Gestión de Clientes");
+            frameClientes.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frameClientes.setSize(600, 400);
+            frameClientes.setLocationRelativeTo(this);
+            frameClientes.setLayout(new BorderLayout());
+            frameClientes.add(new VentanaClientes(modoOscuro), BorderLayout.CENTER);
+            frameClientes.setVisible(true);
+        });
+
+        // Listener para abrir VentanaVehiculos en una ventana aparte
+        itemGestionVehiculos.addActionListener(e -> {
+            JFrame frameVehiculos = new JFrame("Gestión de Vehículos");
+            frameVehiculos.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frameVehiculos.setSize(600, 400);
+            frameVehiculos.setLocationRelativeTo(this);
+            frameVehiculos.setLayout(new BorderLayout());
+            frameVehiculos.add(new VentanaVehiculos(modoOscuro), BorderLayout.CENTER);
+            frameVehiculos.setVisible(true);
+        });
+
+        // Listener para salir con confirmación
+        itemSalir.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea salir?", "Confirmar salida", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                System.exit(0);
+            }
+        });
     }
 
     private void crearContenido() {
