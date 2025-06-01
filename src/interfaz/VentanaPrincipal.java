@@ -6,11 +6,12 @@ public class VentanaPrincipal extends JFrame {
     private JPanel panel;
     private JTabbedPane pestañas;
     private JPanel panelModo;
+    private VentanaClientes ventanaClientes;
 
     public VentanaPrincipal() {
         setTitle("Obligatorio Prog 2 - Autor: Giovanni 288127, Nicolas 258264");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(600, 400);
+        setSize(800, 600);
         setLocationRelativeTo(null);
         initComponents();
     }
@@ -29,6 +30,9 @@ public class VentanaPrincipal extends JFrame {
                 c.setForeground(texto);
             }
         }
+        if (ventanaClientes != null) {
+            ventanaClientes.setModoOscuro(!modoOscuro);
+        }
         modoOscuro = !modoOscuro;
     }
 
@@ -38,11 +42,12 @@ public class VentanaPrincipal extends JFrame {
 
         // Barra de pestañas arriba
         pestañas = new JTabbedPane();
-        pestañas.addTab("Gestión", new JPanel());
+        ventanaClientes = new VentanaClientes(modoOscuro);
+        pestañas.addTab("Gestión", ventanaClientes);
         pestañas.addTab("Movimientos", new JPanel());
         pestañas.addTab("Varios", new JPanel());
         pestañas.addTab("Terminal", new JPanel());
-        panel.add(pestañas, BorderLayout.NORTH);
+        panel.add(pestañas, BorderLayout.CENTER);
 
         // Botón Claro/Oscuro centrado abajo
         JButton btnModo = new JButton("Claro/Oscuro");
