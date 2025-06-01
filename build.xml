@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Parking247" default="default" basedir=".">
+    <description>Builds, tests, and runs the project Parking247.</description>
+    <import file="nbproject/build-impl.xml"/>
+    
+    <!-- Define project properties -->
+    <property name="src.dir" value="src"/>
+    <property name="build.dir" value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="dist.dir" value="dist"/>
+    <property name="dist.jar" value="${dist.dir}/Parking247.jar"/>
+    
+    <!-- Create necessary directories -->
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+    
+    <!-- Compile the project -->
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false"/>
+    </target>
+    
+    <!-- Create JAR file -->
+    <target name="jar" depends="compile">
+        <jar destfile="${dist.jar}" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="dominio.DatosSistema"/>
+            </manifest>
+        </jar>
+    </target>
+    
+    <!-- Clean build files -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+    
+    <!-- Default target -->
+    <target name="default" depends="jar"/>
+</project> 
