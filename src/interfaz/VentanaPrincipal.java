@@ -6,6 +6,8 @@ import java.awt.*;
 public class VentanaPrincipal extends JFrame {
     private boolean modoOscuro = false;
     private JPanel panel;
+    private JTabbedPane pestañas;
+    private JPanel panelModo;
 
     public VentanaPrincipal() {
         setTitle("Obligatorio Prog 2 - Autor: Giovanni 288127, Nicolas 258264");
@@ -16,10 +18,18 @@ public class VentanaPrincipal extends JFrame {
     }
 
     private void cambiarModo() {
-        if (modoOscuro) {
-            panel.setBackground(Color.WHITE);
-        } else {
-            panel.setBackground(Color.DARK_GRAY);
+        Color fondo = modoOscuro ? Color.WHITE : Color.DARK_GRAY;
+        Color texto = modoOscuro ? Color.BLACK : Color.WHITE;
+        panel.setBackground(fondo);
+        pestañas.setBackground(fondo);
+        pestañas.setForeground(texto);
+        panelModo.setBackground(fondo);
+        for (int i = 0; i < pestañas.getTabCount(); i++) {
+            Component c = pestañas.getComponentAt(i);
+            if (c instanceof JPanel) {
+                c.setBackground(fondo);
+                c.setForeground(texto);
+            }
         }
         modoOscuro = !modoOscuro;
     }
@@ -29,7 +39,7 @@ public class VentanaPrincipal extends JFrame {
         panel.setLayout(new BorderLayout());
 
         // Barra de pestañas arriba
-        JTabbedPane pestañas = new JTabbedPane();
+        pestañas = new JTabbedPane();
         pestañas.addTab("Gestión", new JPanel());
         pestañas.addTab("Movimientos", new JPanel());
         pestañas.addTab("Varios", new JPanel());
@@ -39,7 +49,7 @@ public class VentanaPrincipal extends JFrame {
         // Botón Claro/Oscuro centrado abajo
         JButton btnModo = new JButton("Claro/Oscuro");
         btnModo.addActionListener(e -> cambiarModo());
-        JPanel panelModo = new JPanel();
+        panelModo = new JPanel();
         panelModo.setLayout(new FlowLayout(FlowLayout.CENTER));
         panelModo.add(btnModo);
         panel.add(panelModo, BorderLayout.SOUTH);
