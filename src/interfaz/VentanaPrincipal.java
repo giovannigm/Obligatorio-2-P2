@@ -35,8 +35,10 @@ public class VentanaPrincipal extends JFrame {
         // Menú Gestión
         menuGestion = new JMenu("Gestión");
         itemGestionClientes = new JMenuItem("Gestión de Clientes");
+
         menuGestion.add(itemGestionClientes);
         itemGestionVehiculos = new JMenuItem("Gestión de Vehículos");
+        
         menuGestion.add(itemGestionVehiculos);
         menuGestion.add(new JMenuItem("Gestión de Empleados"));
         menuGestion.add(new JMenuItem("Gestión de Contratos"));
