@@ -7,7 +7,7 @@ public class VentanaPrincipal extends JFrame {
     private JPanel panelPrincipal;
     private JButton btnModo;
     private JMenu menuGestion, menuMov, menuVarios, menuTerminar;
-    private JMenuItem itemGestionVehiculos, itemGestionClientes, itemGestionEmpleados;
+    private JMenuItem itemGestionVehiculos, itemGestionClientes, itemGestionEmpleados, itemMiniJuego;
 
     public VentanaPrincipal() {
         try {
@@ -55,7 +55,8 @@ public class VentanaPrincipal extends JFrame {
         menuVarios.add(new JMenuItem("Reportes"));
         menuVarios.add(new JMenuItem("Recuperación de datos"));
         menuVarios.add(new JMenuItem("Grabación de datos"));
-        menuVarios.add(new JMenuItem("MiniJuego"));
+        itemMiniJuego = new JMenuItem("MiniJuego");
+        menuVarios.add(itemMiniJuego);
         menuVarios.add(new JMenuItem("Información de Autores"));
 
         // Menú Terminar
@@ -101,6 +102,12 @@ public class VentanaPrincipal extends JFrame {
             frameEmpleados.setLayout(new BorderLayout());
             frameEmpleados.add(new VentanaEmpleados(modoOscuro), BorderLayout.CENTER);
             frameEmpleados.setVisible(true);
+        });
+
+        // Listener para abrir VentanaMiniJuego en una ventana aparte
+        itemMiniJuego.addActionListener(e -> {
+            VentanaMiniJuego frameMiniJuego = new VentanaMiniJuego();
+            frameMiniJuego.setVisible(true);
         });
 
         // Listener para salir con confirmación
