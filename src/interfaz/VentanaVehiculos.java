@@ -46,13 +46,16 @@ public class VentanaVehiculos extends JPanel {
     // Limitar a 7 caracteres
     ((AbstractDocument) txtMatricula.getDocument()).setDocumentFilter(new DocumentFilter() {
       @Override
-      public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+      public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+          throws BadLocationException {
         if (fb.getDocument().getLength() + string.length() <= 7) {
           super.insertString(fb, offset, string, attr);
         }
       }
+
       @Override
-      public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+      public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+          throws BadLocationException {
         if (fb.getDocument().getLength() - length + (text != null ? text.length() : 0) <= 7) {
           super.replace(fb, offset, length, text, attrs);
         }
@@ -88,17 +91,17 @@ public class VentanaVehiculos extends JPanel {
     // Panel de botones
     JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER));
     JButton btnAgregar = new JButton("Agregar");
-    JButton btnActualizar = new JButton("Actualizar Estado");
+    JButton btnEliminar = new JButton("Eliminar");
     JButton btnLimpiar = new JButton("Limpiar");
 
     btnAgregar.addActionListener(e -> agregarVehiculo());
-    btnActualizar.addActionListener(e -> actualizarEstado());
+    btnEliminar.addActionListener(e -> eliminarVehiculo());
     btnLimpiar.addActionListener(e -> limpiarCampos());
 
-    btnActualizar.setEnabled(false); // Inicialmente deshabilitado
+    btnEliminar.setEnabled(false); // Inicialmente deshabilitado
 
     panelBotones.add(btnAgregar);
-    panelBotones.add(btnActualizar);
+    panelBotones.add(btnEliminar);
     panelBotones.add(btnLimpiar);
 
     // Panel de estado
@@ -126,9 +129,9 @@ public class VentanaVehiculos extends JPanel {
         int fila = tablaVehiculos.getSelectedRow();
         if (fila != -1) {
           cargarVehiculoSeleccionado(fila);
-          btnActualizar.setEnabled(true);
+          btnEliminar.setEnabled(true);
         } else {
-          btnActualizar.setEnabled(false);
+          btnEliminar.setEnabled(false);
         }
       }
     });
@@ -210,18 +213,24 @@ public class VentanaVehiculos extends JPanel {
     mostrarExito("Vehículo agregado exitosamente");
   }
 
-  private void actualizarEstado() {
+  // Elimina el vehículo seleccionado de la tabla y la lista de vehículos.
+  // Si no hay selección, muestra un error. Si hay, pide confirmación y elimina.
+  private void eliminarVehiculo() {
     if (vehiculoSeleccionado == null) {
-      mostrarError("Debe seleccionar un vehículo para actualizar");
+      mostrarError("Debe seleccionar un vehículo para eliminar");
       return;
     }
-
-    String nuevoEstado = (String) cmbEstado.getSelectedItem();
-    vehiculoSeleccionado.setEstado(nuevoEstado);
-    actualizarTabla();
-    mostrarExito("Estado actualizado exitosamente");
+    int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar el vehículo?",
+        "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+    if (confirm == JOptionPane.YES_OPTION) {
+      datos.eliminarVehiculo(vehiculoSeleccionado.getMatricula());
+      actualizarTabla();
+      limpiarCampos();
+      mostrarExito("Vehículo eliminado exitosamente");
+    }
   }
 
+  // Limpia todos los campos del formulario y el estado.
   private void limpiarCampos() {
     txtMatricula.setText("");
     txtMarca.setText("");
@@ -232,6 +241,7 @@ public class VentanaVehiculos extends JPanel {
     lblEstado.setText(" ");
   }
 
+  // Carga los datos del vehículo seleccionado en los campos del formulario.
   private void cargarVehiculoSeleccionado(int fila) {
     String matricula = (String) tablaVehiculos.getValueAt(fila, 0);
     vehiculoSeleccionado = datos.buscarVehiculo(matricula);

@@ -136,7 +136,7 @@ public class VentanaClientes extends JPanel {
     btnAgregar.addActionListener(e -> agregarCliente());
     btnEliminar.addActionListener(e -> eliminarCliente());
     btnLimpiar.addActionListener(e -> limpiarCampos());
-
+    btnEliminar.setEnabled(false); // Inicialmente deshabilitado
     panelBotones.add(btnAgregar);
     panelBotones.add(btnEliminar);
     panelBotones.add(btnLimpiar);
@@ -166,6 +166,9 @@ public class VentanaClientes extends JPanel {
         int fila = tablaClientes.getSelectedRow();
         if (fila != -1) {
           cargarClienteSeleccionado(fila);
+          btnEliminar.setEnabled(true);
+        } else {
+          btnEliminar.setEnabled(false);
         }
       }
     });
@@ -252,23 +255,29 @@ public class VentanaClientes extends JPanel {
     }
   }
 
+  // Elimina el cliente seleccionado de la tabla y la lista de clientes.
+  // Si no hay selección, muestra un error. Si hay, pide confirmación y elimina.
   private void eliminarCliente() {
     int fila = tablaClientes.getSelectedRow();
     if (fila == -1) {
       mostrarError("Debe seleccionar un cliente para eliminar");
       return;
     }
-
     String cedula = (String) tablaClientes.getValueAt(fila, 1);
-    ClienteMensual cliente = datos.buscarCliente(cedula);
-    if (cliente != null) {
-      datos.getClientes().remove(cliente);
-      actualizarTabla();
-      limpiarCampos();
-      mostrarExito("Cliente eliminado exitosamente");
+    int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar el cliente?",
+        "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+    if (confirm == JOptionPane.YES_OPTION) {
+      ClienteMensual cliente = datos.buscarCliente(cedula);
+      if (cliente != null) {
+        datos.getClientes().remove(cliente);
+        actualizarTabla();
+        limpiarCampos();
+        mostrarExito("Cliente eliminado exitosamente");
+      }
     }
   }
 
+  // Limpia todos los campos del formulario y el estado.
   private void limpiarCampos() {
     txtNombre.setText("");
     txtCedula.setText("");
@@ -279,6 +288,7 @@ public class VentanaClientes extends JPanel {
     lblEstado.setText(" ");
   }
 
+  // Carga los datos del cliente seleccionado en los campos del formulario.
   private void cargarClienteSeleccionado(int fila) {
     txtNombre.setText((String) tablaClientes.getValueAt(fila, 0));
     txtCedula.setText((String) tablaClientes.getValueAt(fila, 1));
