@@ -38,7 +38,7 @@ public class VentanaPrincipal extends JFrame {
 
         menuGestion.add(itemGestionClientes);
         itemGestionVehiculos = new JMenuItem("Gestión de Vehículos");
-        
+
         menuGestion.add(itemGestionVehiculos);
         itemGestionEmpleados = new JMenuItem("Gestión de Empleados");
         menuGestion.add(itemGestionEmpleados);
@@ -105,7 +105,8 @@ public class VentanaPrincipal extends JFrame {
 
         // Listener para salir con confirmación
         itemSalir.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea salir?", "Confirmar salida", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea salir?", "Confirmar salida",
+                    JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 System.exit(0);
             }
@@ -163,7 +164,7 @@ public class VentanaPrincipal extends JFrame {
                 for (int j = 0; j < menu.getItemCount(); j++) {
                     JMenuItem item = menu.getItem(j);
                     if (item != null) {
-                        item.setBackground(Color.WHITE);  // 🔄 Siempre blanco
+                        item.setBackground(Color.WHITE); // 🔄 Siempre blanco
                         item.setForeground(Color.BLACK);
                         item.setOpaque(true);
                     }

@@ -264,7 +264,8 @@ public class VentanaClientes extends JPanel {
       return;
     }
     String cedula = (String) tablaClientes.getValueAt(fila, 1);
-    int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar el cliente?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+    int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar el cliente?",
+        "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
     if (confirm == JOptionPane.YES_OPTION) {
       ClienteMensual cliente = datos.buscarCliente(cedula);
       if (cliente != null) {

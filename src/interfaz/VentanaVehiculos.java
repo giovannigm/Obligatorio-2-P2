@@ -46,13 +46,16 @@ public class VentanaVehiculos extends JPanel {
     // Limitar a 7 caracteres
     ((AbstractDocument) txtMatricula.getDocument()).setDocumentFilter(new DocumentFilter() {
       @Override
-      public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+      public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+          throws BadLocationException {
         if (fb.getDocument().getLength() + string.length() <= 7) {
           super.insertString(fb, offset, string, attr);
         }
       }
+
       @Override
-      public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+      public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+          throws BadLocationException {
         if (fb.getDocument().getLength() - length + (text != null ? text.length() : 0) <= 7) {
           super.replace(fb, offset, length, text, attrs);
         }
@@ -217,7 +220,8 @@ public class VentanaVehiculos extends JPanel {
       mostrarError("Debe seleccionar un vehículo para eliminar");
       return;
     }
-    int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar el vehículo?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+    int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar el vehículo?",
+        "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
     if (confirm == JOptionPane.YES_OPTION) {
       datos.eliminarVehiculo(vehiculoSeleccionado.getMatricula());
       actualizarTabla();
