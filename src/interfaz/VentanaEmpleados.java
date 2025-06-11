@@ -8,16 +8,15 @@ public class VentanaEmpleados extends JPanel {
   private JTextField txtNombre;
   private JTextField txtCedula;
   private JTextField txtDireccion;
-  private JTextField txtNumeroEmpleado;
   private JTable tablaEmpleados;
   private DefaultTableModel modelo;
+  private JScrollPane scrollTabla;
   private JLabel lblEstado;
   private DatosSistema datos;
   private boolean modoOscuro;
   private JLabel lblNombre;
   private JLabel lblCedula;
   private JLabel lblDireccion;
-  private JLabel lblNumeroEmpleado;
 
   public VentanaEmpleados(boolean modoOscuro) {
     this.modoOscuro = modoOscuro;
@@ -41,22 +40,6 @@ public class VentanaEmpleados extends JPanel {
       @Override
       public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
         if ((fb.getDocument().getLength() - length + (text != null ? text.length() : 0) <= 9) && (text == null || text.matches("\\d*"))) {
-          super.replace(fb, offset, length, text, attrs);
-        }
-      }
-    };
-
-    // Filtro para solo números (Número de empleado)
-    DocumentFilter soloNumerosFilter = new DocumentFilter() {
-      @Override
-      public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-        if (string.matches("\\d*")) {
-          super.insertString(fb, offset, string, attr);
-        }
-      }
-      @Override
-      public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-        if (text == null || text.matches("\\d*")) {
           super.replace(fb, offset, length, text, attrs);
         }
       }
@@ -93,15 +76,6 @@ public class VentanaEmpleados extends JPanel {
     txtDireccion = new JTextField(20);
     panelFormulario.add(txtDireccion, gbc);
 
-    gbc.gridx = 0;
-    gbc.gridy = 3;
-    lblNumeroEmpleado = new JLabel("Número Empleado:");
-    panelFormulario.add(lblNumeroEmpleado, gbc);
-    gbc.gridx = 1;
-    txtNumeroEmpleado = new JTextField(20);
-    ((AbstractDocument) txtNumeroEmpleado.getDocument()).setDocumentFilter(soloNumerosFilter);
-    panelFormulario.add(txtNumeroEmpleado, gbc);
-
     // Panel de botones
     JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER));
     JButton btnAgregar = new JButton("Agregar");
@@ -110,6 +84,7 @@ public class VentanaEmpleados extends JPanel {
     btnAgregar.addActionListener(e -> agregarEmpleado());
     btnEliminar.addActionListener(e -> eliminarEmpleado());
     btnLimpiar.addActionListener(e -> limpiarCampos());
+    btnEliminar.setEnabled(false); // Inicialmente deshabilitado
     panelBotones.add(btnAgregar);
     panelBotones.add(btnEliminar);
     panelBotones.add(btnLimpiar);
@@ -127,12 +102,22 @@ public class VentanaEmpleados extends JPanel {
     };
     tablaEmpleados = new JTable(modelo);
     tablaEmpleados.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    tablaEmpleados.setOpaque(false);
+    tablaEmpleados.getTableHeader().setOpaque(false);
     tablaEmpleados.getSelectionModel().addListSelectionListener(e -> {
-      if (!e.getValueIsAdjusting() && tablaEmpleados.getSelectedRow() != -1) {
-        cargarEmpleadoSeleccionado(tablaEmpleados.getSelectedRow());
+      if (!e.getValueIsAdjusting()) {
+        int fila = tablaEmpleados.getSelectedRow();
+        if (fila != -1) {
+          cargarEmpleadoSeleccionado(fila);
+          btnEliminar.setEnabled(true);
+        } else {
+          btnEliminar.setEnabled(false);
+        }
       }
     });
-    JScrollPane scrollTabla = new JScrollPane(tablaEmpleados);
+    scrollTabla = new JScrollPane(tablaEmpleados);
+    scrollTabla.setOpaque(false);
+    scrollTabla.getViewport().setOpaque(false);
 
     // Panel superior (formulario + botones)
     JPanel panelSuperior = new JPanel(new BorderLayout());
@@ -158,8 +143,7 @@ public class VentanaEmpleados extends JPanel {
     String nombre = txtNombre.getText().trim();
     String cedula = txtCedula.getText().trim();
     String direccion = txtDireccion.getText().trim();
-    String nroEmpStr = txtNumeroEmpleado.getText().trim();
-    if (nombre.isEmpty() || cedula.isEmpty() || direccion.isEmpty() || nroEmpStr.isEmpty()) {
+    if (nombre.isEmpty() || cedula.isEmpty() || direccion.isEmpty()) {
       mostrarError("Todos los campos son obligatorios.");
       return;
     }
@@ -170,12 +154,11 @@ public class VentanaEmpleados extends JPanel {
         return;
       }
     }
-    int nroEmpleado;
-    try {
-      nroEmpleado = Integer.parseInt(nroEmpStr);
-    } catch (NumberFormatException ex) {
-      mostrarError("Número de empleado inválido.");
-      return;
+    // Calcular número de empleado automático
+    int nroEmpleado = 1;
+    ArrayList<Empleado> empleados = datos.getEmpleados();
+    if (!empleados.isEmpty()) {
+      nroEmpleado = empleados.stream().mapToInt(Empleado::getNumeroEmpleado).max().orElse(0) + 1;
     }
     Empleado nuevo = new Empleado(nombre, cedula, direccion, nroEmpleado);
     datos.agregarEmpleado(nuevo);
@@ -184,6 +167,8 @@ public class VentanaEmpleados extends JPanel {
     mostrarExito("Empleado agregado correctamente.");
   }
 
+  // Elimina el empleado seleccionado de la tabla y la lista de empleados.
+  // Si no hay selección, muestra un error. Si hay, pide confirmación y elimina.
   private void eliminarEmpleado() {
     int fila = tablaEmpleados.getSelectedRow();
     if (fila == -1) {
@@ -191,26 +176,29 @@ public class VentanaEmpleados extends JPanel {
       return;
     }
     String cedula = (String) modelo.getValueAt(fila, 1);
-    ArrayList<Empleado> empleados = datos.getEmpleados();
-    empleados.removeIf(emp -> emp.getCedula().equals(cedula));
-    actualizarTabla();
-    limpiarCampos();
-    mostrarExito("Empleado eliminado.");
+    int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar el empleado?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+    if (confirm == JOptionPane.YES_OPTION) {
+      ArrayList<Empleado> empleados = datos.getEmpleados();
+      empleados.removeIf(emp -> emp.getCedula().equals(cedula));
+      actualizarTabla();
+      limpiarCampos();
+      mostrarExito("Empleado eliminado.");
+    }
   }
 
+  // Limpia todos los campos del formulario y el estado.
   private void limpiarCampos() {
     txtNombre.setText("");
     txtCedula.setText("");
     txtDireccion.setText("");
-    txtNumeroEmpleado.setText("");
     tablaEmpleados.clearSelection();
   }
 
+  // Carga los datos del empleado seleccionado en los campos del formulario.
   private void cargarEmpleadoSeleccionado(int fila) {
     txtNombre.setText((String) modelo.getValueAt(fila, 0));
     txtCedula.setText((String) modelo.getValueAt(fila, 1));
     txtDireccion.setText((String) modelo.getValueAt(fila, 2));
-    txtNumeroEmpleado.setText(modelo.getValueAt(fila, 3).toString());
   }
 
   private void mostrarError(String mensaje) {
@@ -238,7 +226,6 @@ public class VentanaEmpleados extends JPanel {
     if (lblNombre != null) lblNombre.setForeground(texto);
     if (lblCedula != null) lblCedula.setForeground(texto);
     if (lblDireccion != null) lblDireccion.setForeground(texto);
-    if (lblNumeroEmpleado != null) lblNumeroEmpleado.setForeground(texto);
     if (tablaEmpleados != null) {
       tablaEmpleados.setBackground(fondo);
       tablaEmpleados.setForeground(texto);
