@@ -7,7 +7,7 @@ public class VentanaPrincipal extends JFrame {
     private JPanel panelPrincipal;
     private JButton btnModo;
     private JMenu menuGestion, menuMov, menuVarios, menuTerminar;
-    private JMenuItem itemGestionVehiculos, itemGestionClientes;
+    private JMenuItem itemGestionVehiculos, itemGestionClientes, itemGestionEmpleados;
 
     public VentanaPrincipal() {
         try {
@@ -40,7 +40,8 @@ public class VentanaPrincipal extends JFrame {
         itemGestionVehiculos = new JMenuItem("Gestión de Vehículos");
         
         menuGestion.add(itemGestionVehiculos);
-        menuGestion.add(new JMenuItem("Gestión de Empleados"));
+        itemGestionEmpleados = new JMenuItem("Gestión de Empleados");
+        menuGestion.add(itemGestionEmpleados);
         menuGestion.add(new JMenuItem("Gestión de Contratos"));
 
         // Menú Movimientos
@@ -89,6 +90,17 @@ public class VentanaPrincipal extends JFrame {
             frameVehiculos.setLayout(new BorderLayout());
             frameVehiculos.add(new VentanaVehiculos(modoOscuro), BorderLayout.CENTER);
             frameVehiculos.setVisible(true);
+        });
+
+        // Listener para abrir VentanaEmpleados en una ventana aparte
+        itemGestionEmpleados.addActionListener(e -> {
+            JFrame frameEmpleados = new JFrame("Gestión de Empleados");
+            frameEmpleados.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frameEmpleados.setSize(600, 400);
+            frameEmpleados.setLocationRelativeTo(this);
+            frameEmpleados.setLayout(new BorderLayout());
+            frameEmpleados.add(new VentanaEmpleados(modoOscuro), BorderLayout.CENTER);
+            frameEmpleados.setVisible(true);
         });
 
         // Listener para salir con confirmación
