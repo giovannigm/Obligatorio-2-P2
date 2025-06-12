@@ -58,7 +58,6 @@ public class Empleado implements Serializable {
 
   @Override
   public String toString() {
-    return "Empleado{" + "nombre=" + nombre + ", cedula=" + cedula +
-        ", direccion=" + direccion + ", numeroEmpleado=" + numeroEmpleado + '}';
+    return nombre + " - " + cedula;
   }
 }

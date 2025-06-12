@@ -109,7 +109,7 @@ public class VentanaContratos extends JPanel {
     aplicarEstilos();
   }
 
-  private void actualizarCombos() {
+  public void actualizarCombos() {
     cmbClientes.removeAllItems();
     cmbVehiculos.removeAllItems();
     cmbEmpleados.removeAllItems();
@@ -125,7 +125,7 @@ public class VentanaContratos extends JPanel {
     }
   }
 
-  private void actualizarTabla() {
+  public void actualizarTabla() {
     modelo.setRowCount(0);
     ArrayList<Contrato> contratos = datos.getContratos();
     for (Contrato contrato : contratos) {
@@ -138,6 +138,12 @@ public class VentanaContratos extends JPanel {
       };
       modelo.addRow(fila);
     }
+  }
+
+  // Método público para refrescar todos los datos
+  public void refrescarDatos() {
+    actualizarCombos();
+    actualizarTabla();
   }
 
   private void agregarContrato() {

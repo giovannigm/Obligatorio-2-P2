@@ -58,7 +58,6 @@ public class Vehiculo implements Serializable {
 
   @Override
   public String toString() {
-    return "Vehiculo{" + "matricula=" + matricula + ", marca=" + marca +
-        ", modelo=" + modelo + ", estado=" + estado + '}';
+    return marca + " " + modelo + " (" + matricula + ")";
   }
 }

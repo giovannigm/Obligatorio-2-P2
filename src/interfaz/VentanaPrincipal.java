@@ -65,6 +65,15 @@ public class VentanaPrincipal extends JFrame {
         pestañas.addTab("Movimientos", new JPanel());
         pestañas.addTab("Varios", new JPanel());
         pestañas.addTab("Terminal", new JPanel());
+
+        // Agregar listener para actualizar comboboxes cuando se cambie a la pestaña
+        // Contratos
+        pestañas.addChangeListener(e -> {
+            if (pestañas.getSelectedComponent() == ventanaContratos) {
+                ventanaContratos.refrescarDatos();
+            }
+        });
+
         panel.add(pestañas, BorderLayout.CENTER);
 
         // Botón Claro/Oscuro centrado abajo
