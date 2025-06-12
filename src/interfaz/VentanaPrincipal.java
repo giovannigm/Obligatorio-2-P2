@@ -55,7 +55,8 @@ public class VentanaPrincipal extends JFrame {
 
         // Menú Varios
         menuVarios = new JMenu("Varios");
-        menuVarios.add(new JMenuItem("Reportes"));
+        JMenuItem itemReportes = new JMenuItem("Reportes");
+        menuVarios.add(itemReportes);
         menuVarios.add(new JMenuItem("Recuperación de datos"));
         menuVarios.add(new JMenuItem("Grabación de datos"));
         itemMiniJuego = new JMenuItem("MiniJuego");
@@ -134,6 +135,24 @@ public class VentanaPrincipal extends JFrame {
             frameMiniJuego.setVisible(true);
         });
 
+        // Listener para abrir VentanaReportes en una ventana aparte
+        itemReportes.addActionListener(e -> {
+            JFrame frameReportes = new JFrame("Reportes");
+            frameReportes.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frameReportes.setSize(600, 400);
+            frameReportes.setLocationRelativeTo(this);
+            frameReportes.setLayout(new BorderLayout());
+            VentanaReportes panel = new VentanaReportes(modoOscuro);
+            frameReportes.add(panel, BorderLayout.CENTER);
+            frameReportes.setVisible(true);
+            ventanasSecundarias.add(frameReportes);
+            frameReportes.addWindowListener(new java.awt.event.WindowAdapter() {
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    ventanasSecundarias.remove(frameReportes);
+                }
+            });
+        });
+
         // Listener para salir con confirmación
         itemSalir.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea salir?", "Confirmar salida",
@@ -164,6 +183,8 @@ public class VentanaPrincipal extends JFrame {
                     ((VentanaVehiculos) panel).setModoOscuro(modoOscuro);
                 } else if (panel instanceof VentanaEmpleados) {
                     ((VentanaEmpleados) panel).setModoOscuro(modoOscuro);
+                } else if (panel instanceof VentanaReportes) {
+                    ((VentanaReportes) panel).setModoOscuro(modoOscuro);
                 }
             }
         });

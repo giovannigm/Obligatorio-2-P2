@@ -13,20 +13,17 @@ public class VentanaEmpleados extends JPanel {
     private JScrollPane scrollTabla;
     private JLabel lblEstado;
     private DatosSistema datos;
-    private boolean modoOscuro;
     private JLabel lblNombre;
     private JLabel lblCedula;
     private JLabel lblDireccion;
 
     public VentanaEmpleados(boolean modoOscuro) {
-        this.modoOscuro = modoOscuro;
         this.datos = DatosSistema.getInstancia();
-        initComponents();
-        aplicarEstilos();
+        initComponents(modoOscuro);
         actualizarTabla();
     }
 
-    private void initComponents() {
+    private void initComponents(boolean modoOscuro) {
         setLayout(new BorderLayout());
 
         // Filtro para solo 9 números (Cédula)
@@ -131,6 +128,8 @@ public class VentanaEmpleados extends JPanel {
         add(panelSuperior, BorderLayout.NORTH);
         add(scrollTabla, BorderLayout.CENTER);
         add(lblEstado, BorderLayout.SOUTH);
+
+        aplicarEstilos(modoOscuro);
     }
 
     private void actualizarTabla() {
@@ -215,7 +214,7 @@ public class VentanaEmpleados extends JPanel {
         lblEstado.setText(mensaje);
     }
 
-    private void aplicarEstilos() {
+    private void aplicarEstilos(boolean modoOscuro) {
         Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
         Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
         setBackground(fondo);
@@ -244,7 +243,6 @@ public class VentanaEmpleados extends JPanel {
     }
 
     public void setModoOscuro(boolean modoOscuro) {
-        this.modoOscuro = modoOscuro;
-        aplicarEstilos();
+        aplicarEstilos(modoOscuro);
     }
 }
