@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.*;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -11,6 +12,10 @@ public class VentanaVehiculos extends JPanel {
   private JTable tablaVehiculos;
   private DefaultTableModel modelo;
   private JLabel lblEstado;
+  private JLabel lblMatricula;
+  private JLabel lblMarca;
+  private JLabel lblModelo;
+  private JLabel lblEstadoVehiculo;
   private DatosSistema datos;
   private boolean modoOscuro;
   private Vehiculo vehiculoSeleccionado;
@@ -34,28 +39,50 @@ public class VentanaVehiculos extends JPanel {
     // Campos del formulario
     gbc.gridx = 0;
     gbc.gridy = 0;
-    panelFormulario.add(new JLabel("Matrícula:"), gbc);
+    lblMatricula = new JLabel("Matrícula:");
+    panelFormulario.add(lblMatricula, gbc);
     gbc.gridx = 1;
     txtMatricula = new JTextField(20);
+    // Limitar a 7 caracteres
+    ((AbstractDocument) txtMatricula.getDocument()).setDocumentFilter(new DocumentFilter() {
+      @Override
+      public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+          throws BadLocationException {
+        if (fb.getDocument().getLength() + string.length() <= 7) {
+          super.insertString(fb, offset, string, attr);
+        }
+      }
+
+      @Override
+      public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+          throws BadLocationException {
+        if (fb.getDocument().getLength() - length + (text != null ? text.length() : 0) <= 7) {
+          super.replace(fb, offset, length, text, attrs);
+        }
+      }
+    });
     panelFormulario.add(txtMatricula, gbc);
 
     gbc.gridx = 0;
     gbc.gridy = 1;
-    panelFormulario.add(new JLabel("Marca:"), gbc);
+    lblMarca = new JLabel("Marca:");
+    panelFormulario.add(lblMarca, gbc);
     gbc.gridx = 1;
     txtMarca = new JTextField(20);
     panelFormulario.add(txtMarca, gbc);
 
     gbc.gridx = 0;
     gbc.gridy = 2;
-    panelFormulario.add(new JLabel("Modelo:"), gbc);
+    lblModelo = new JLabel("Modelo:");
+    panelFormulario.add(lblModelo, gbc);
     gbc.gridx = 1;
     txtModelo = new JTextField(20);
     panelFormulario.add(txtModelo, gbc);
 
     gbc.gridx = 0;
     gbc.gridy = 3;
-    panelFormulario.add(new JLabel("Estado:"), gbc);
+    lblEstadoVehiculo = new JLabel("Estado:");
+    panelFormulario.add(lblEstadoVehiculo, gbc);
     gbc.gridx = 1;
     String[] estados = { "Bueno", "Taller", "Averiado", "En servicio" };
     cmbEstado = new JComboBox<>(estados);
@@ -64,17 +91,17 @@ public class VentanaVehiculos extends JPanel {
     // Panel de botones
     JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER));
     JButton btnAgregar = new JButton("Agregar");
-    JButton btnActualizar = new JButton("Actualizar Estado");
+    JButton btnEliminar = new JButton("Eliminar");
     JButton btnLimpiar = new JButton("Limpiar");
 
     btnAgregar.addActionListener(e -> agregarVehiculo());
-    btnActualizar.addActionListener(e -> actualizarEstado());
+    btnEliminar.addActionListener(e -> eliminarVehiculo());
     btnLimpiar.addActionListener(e -> limpiarCampos());
 
-    btnActualizar.setEnabled(false); // Inicialmente deshabilitado
+    btnEliminar.setEnabled(false); // Inicialmente deshabilitado
 
     panelBotones.add(btnAgregar);
-    panelBotones.add(btnActualizar);
+    panelBotones.add(btnEliminar);
     panelBotones.add(btnLimpiar);
 
     // Panel de estado
@@ -90,7 +117,11 @@ public class VentanaVehiculos extends JPanel {
       }
     };
     tablaVehiculos = new JTable(modelo);
+    tablaVehiculos.setOpaque(false);
+    tablaVehiculos.getTableHeader().setOpaque(false);
     JScrollPane scrollPane = new JScrollPane(tablaVehiculos);
+    scrollPane.setOpaque(false);
+    scrollPane.getViewport().setOpaque(false);
 
     // Listener para selección en la tabla
     tablaVehiculos.getSelectionModel().addListSelectionListener(e -> {
@@ -98,9 +129,9 @@ public class VentanaVehiculos extends JPanel {
         int fila = tablaVehiculos.getSelectedRow();
         if (fila != -1) {
           cargarVehiculoSeleccionado(fila);
-          btnActualizar.setEnabled(true);
+          btnEliminar.setEnabled(true);
         } else {
-          btnActualizar.setEnabled(false);
+          btnEliminar.setEnabled(false);
         }
       }
     });
@@ -118,7 +149,7 @@ public class VentanaVehiculos extends JPanel {
   }
 
   private void aplicarEstilos() {
-    Color fondo = modoOscuro ? Color.DARK_GRAY : Color.WHITE;
+    Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
     Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
 
     setBackground(fondo);
@@ -127,12 +158,15 @@ public class VentanaVehiculos extends JPanel {
         c.setBackground(fondo);
         for (Component child : ((JPanel) c).getComponents()) {
           child.setBackground(fondo);
-          if (child instanceof JLabel) {
-            child.setForeground(texto);
-          }
         }
       }
     }
+    // Seteamos explícitamente el color de los labels del formulario
+    lblMatricula.setForeground(texto);
+    lblMarca.setForeground(texto);
+    lblModelo.setForeground(texto);
+    lblEstadoVehiculo.setForeground(texto);
+
     tablaVehiculos.setBackground(fondo);
     tablaVehiculos.setForeground(texto);
     tablaVehiculos.getTableHeader().setBackground(fondo);
@@ -179,18 +213,24 @@ public class VentanaVehiculos extends JPanel {
     mostrarExito("Vehículo agregado exitosamente");
   }
 
-  private void actualizarEstado() {
+  // Elimina el vehículo seleccionado de la tabla y la lista de vehículos.
+  // Si no hay selección, muestra un error. Si hay, pide confirmación y elimina.
+  private void eliminarVehiculo() {
     if (vehiculoSeleccionado == null) {
-      mostrarError("Debe seleccionar un vehículo para actualizar");
+      mostrarError("Debe seleccionar un vehículo para eliminar");
       return;
     }
-
-    String nuevoEstado = (String) cmbEstado.getSelectedItem();
-    vehiculoSeleccionado.setEstado(nuevoEstado);
-    actualizarTabla();
-    mostrarExito("Estado actualizado exitosamente");
+    int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar el vehículo?",
+        "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+    if (confirm == JOptionPane.YES_OPTION) {
+      datos.eliminarVehiculo(vehiculoSeleccionado.getMatricula());
+      actualizarTabla();
+      limpiarCampos();
+      mostrarExito("Vehículo eliminado exitosamente");
+    }
   }
 
+  // Limpia todos los campos del formulario y el estado.
   private void limpiarCampos() {
     txtMatricula.setText("");
     txtMarca.setText("");
@@ -201,6 +241,7 @@ public class VentanaVehiculos extends JPanel {
     lblEstado.setText(" ");
   }
 
+  // Carga los datos del vehículo seleccionado en los campos del formulario.
   private void cargarVehiculoSeleccionado(int fila) {
     String matricula = (String) tablaVehiculos.getValueAt(fila, 0);
     vehiculoSeleccionado = datos.buscarVehiculo(matricula);

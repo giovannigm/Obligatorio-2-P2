@@ -62,3 +62,22 @@ Letra Obligatorio: https://aulas.ort.edu.uy/pluginfile.php/952924/mod_label/intr
 
 
 Rubrica:  https://aulas.ort.edu.uy/pluginfile.php/952924/mod_label/intro/Rubrica%202do%20Obligatorio%20Alumnos%20%281%29.pdf
+
+
+## CRH
+
+# 📘 CRH – Catálogo de Clases, Responsabilidades y Helpers
+
+| **Clase**             | **Responsabilidad**                                                                 | **Helpers (Colaboradores)**                                                                 |
+|------------------------|-------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| `Cliente`             | Representa un cliente mensual del parking con sus datos personales y antigüedad.   | `Contrato` (uno o más)                                                                      |
+| `Vehiculo`            | Representa un vehículo en el sistema, asociado a cliente o por hora.               | `Contrato`, `Entrada`, `Salida`, `ServicioAdicional`                                        |
+| `Empleado`            | Representa a un empleado que realiza acciones en el sistema.                       | `Contrato`, `Entrada`, `Salida`, `ServicioAdicional`                                        |
+| `Contrato`            | Representa un vínculo mensual entre un cliente y un vehículo, con empleado y monto.| `Cliente`, `Vehiculo`, `Empleado`                                                           |
+| `Entrada`             | Registra el ingreso de un vehículo, con hora, fecha, notas y empleado que lo recibe.| `Vehiculo`, `Empleado`, `Salida` (opcional)                                                 |
+| `Salida`              | Registra la salida de un vehículo, su duración de estadía y observaciones.         | `Entrada`, `Empleado`                                                                       |
+| `ServicioAdicional`   | Representa un servicio opcional realizado al vehículo, con tipo, fecha, costo.     | `Vehiculo`, `Empleado`                                                                      |
+| `SistemaParking`      | Contenedor principal del sistema: gestiona todas las entidades y operaciones.      | `Cliente`, `Vehiculo`, `Empleado`, `Contrato`, `Entrada`, `Salida`, `ServicioAdicional`     |
+| `Persistencia`        | Se encarga de guardar y recuperar el estado del sistema (`DATOS.ser`).             | `SistemaParking`                                                                            |
+| `ControladorTema`     | Controla la apariencia del sistema: modo claro / oscuro.                           | Todas las ventanas gráficas                                                                 |
+

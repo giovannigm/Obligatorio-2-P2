@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.*;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -14,6 +15,11 @@ public class VentanaClientes extends JPanel {
   private JLabel lblEstado;
   private DatosSistema datos;
   private boolean modoOscuro;
+  private JLabel lblNombre;
+  private JLabel lblCedula;
+  private JLabel lblDireccion;
+  private JLabel lblCelular;
+  private JLabel lblAnioAlta;
 
   public VentanaClientes(boolean modoOscuro) {
     this.modoOscuro = modoOscuro;
@@ -25,6 +31,52 @@ public class VentanaClientes extends JPanel {
   private void initComponents() {
     setLayout(new BorderLayout());
 
+    // Filtro para solo 4 números (Año Alta)
+    DocumentFilter soloCuatroNumerosFilter = new DocumentFilter() {
+      @Override
+      public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+          throws BadLocationException {
+        String nuevoTexto = fb.getDocument().getText(0, fb.getDocument().getLength()) + string;
+        if (nuevoTexto.length() <= 4 && string.matches("\\d*")) {
+          super.insertString(fb, offset, string, attr);
+        }
+      }
+
+      @Override
+      public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+          throws BadLocationException {
+        String actual = fb.getDocument().getText(0, fb.getDocument().getLength());
+        StringBuilder sb = new StringBuilder(actual);
+        sb.replace(offset, offset + length, text);
+        if (sb.length() <= 4 && text.matches("\\d*")) {
+          super.replace(fb, offset, length, text, attrs);
+        }
+      }
+    };
+
+    // Filtro para solo 9 números (Cédula y Celular)
+    DocumentFilter soloNueveNumerosFilter = new DocumentFilter() {
+      @Override
+      public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+          throws BadLocationException {
+        String nuevoTexto = fb.getDocument().getText(0, fb.getDocument().getLength()) + string;
+        if (nuevoTexto.length() <= 9 && string.matches("\\d*")) {
+          super.insertString(fb, offset, string, attr);
+        }
+      }
+
+      @Override
+      public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+          throws BadLocationException {
+        String actual = fb.getDocument().getText(0, fb.getDocument().getLength());
+        StringBuilder sb = new StringBuilder(actual);
+        sb.replace(offset, offset + length, text);
+        if (sb.length() <= 9 && text.matches("\\d*")) {
+          super.replace(fb, offset, length, text, attrs);
+        }
+      }
+    };
+
     // Panel de formulario
     JPanel panelFormulario = new JPanel(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
@@ -34,37 +86,45 @@ public class VentanaClientes extends JPanel {
     // Campos del formulario
     gbc.gridx = 0;
     gbc.gridy = 0;
-    panelFormulario.add(new JLabel("Nombre:"), gbc);
+    lblNombre = new JLabel("Nombre:");
+    panelFormulario.add(lblNombre, gbc);
     gbc.gridx = 1;
     txtNombre = new JTextField(20);
     panelFormulario.add(txtNombre, gbc);
 
     gbc.gridx = 0;
     gbc.gridy = 1;
-    panelFormulario.add(new JLabel("Cédula:"), gbc);
+    lblCedula = new JLabel("Cédula:");
+    panelFormulario.add(lblCedula, gbc);
     gbc.gridx = 1;
     txtCedula = new JTextField(20);
+    ((AbstractDocument) txtCedula.getDocument()).setDocumentFilter(soloNueveNumerosFilter);
     panelFormulario.add(txtCedula, gbc);
 
     gbc.gridx = 0;
     gbc.gridy = 2;
-    panelFormulario.add(new JLabel("Dirección:"), gbc);
+    lblDireccion = new JLabel("Dirección:");
+    panelFormulario.add(lblDireccion, gbc);
     gbc.gridx = 1;
     txtDireccion = new JTextField(20);
     panelFormulario.add(txtDireccion, gbc);
 
     gbc.gridx = 0;
     gbc.gridy = 3;
-    panelFormulario.add(new JLabel("Celular:"), gbc);
+    lblCelular = new JLabel("Celular:");
+    panelFormulario.add(lblCelular, gbc);
     gbc.gridx = 1;
     txtCelular = new JTextField(20);
+    ((AbstractDocument) txtCelular.getDocument()).setDocumentFilter(soloNueveNumerosFilter);
     panelFormulario.add(txtCelular, gbc);
 
     gbc.gridx = 0;
     gbc.gridy = 4;
-    panelFormulario.add(new JLabel("Año Alta:"), gbc);
+    lblAnioAlta = new JLabel("Año Alta:");
+    panelFormulario.add(lblAnioAlta, gbc);
     gbc.gridx = 1;
     txtAnioAlta = new JTextField(20);
+    ((AbstractDocument) txtAnioAlta.getDocument()).setDocumentFilter(soloCuatroNumerosFilter);
     panelFormulario.add(txtAnioAlta, gbc);
 
     // Panel de botones
@@ -76,7 +136,7 @@ public class VentanaClientes extends JPanel {
     btnAgregar.addActionListener(e -> agregarCliente());
     btnEliminar.addActionListener(e -> eliminarCliente());
     btnLimpiar.addActionListener(e -> limpiarCampos());
-
+    btnEliminar.setEnabled(false); // Inicialmente deshabilitado
     panelBotones.add(btnAgregar);
     panelBotones.add(btnEliminar);
     panelBotones.add(btnLimpiar);
@@ -94,7 +154,11 @@ public class VentanaClientes extends JPanel {
       }
     };
     tablaClientes = new JTable(modelo);
+    tablaClientes.setOpaque(false);
+    tablaClientes.getTableHeader().setOpaque(false);
     JScrollPane scrollPane = new JScrollPane(tablaClientes);
+    scrollPane.setOpaque(false);
+    scrollPane.getViewport().setOpaque(false);
 
     // Listener para selección en la tabla
     tablaClientes.getSelectionModel().addListSelectionListener(e -> {
@@ -102,6 +166,9 @@ public class VentanaClientes extends JPanel {
         int fila = tablaClientes.getSelectedRow();
         if (fila != -1) {
           cargarClienteSeleccionado(fila);
+          btnEliminar.setEnabled(true);
+        } else {
+          btnEliminar.setEnabled(false);
         }
       }
     });
@@ -119,7 +186,7 @@ public class VentanaClientes extends JPanel {
   }
 
   private void aplicarEstilos() {
-    Color fondo = modoOscuro ? Color.DARK_GRAY : Color.WHITE;
+    Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
     Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
 
     setBackground(fondo);
@@ -128,12 +195,16 @@ public class VentanaClientes extends JPanel {
         c.setBackground(fondo);
         for (Component child : ((JPanel) c).getComponents()) {
           child.setBackground(fondo);
-          if (child instanceof JLabel) {
-            child.setForeground(texto);
-          }
         }
       }
     }
+    // Seteamos explícitamente el color de los labels del formulario
+    lblNombre.setForeground(texto);
+    lblCedula.setForeground(texto);
+    lblDireccion.setForeground(texto);
+    lblCelular.setForeground(texto);
+    lblAnioAlta.setForeground(texto);
+
     tablaClientes.setBackground(fondo);
     tablaClientes.setForeground(texto);
     tablaClientes.getTableHeader().setBackground(fondo);
@@ -184,23 +255,29 @@ public class VentanaClientes extends JPanel {
     }
   }
 
+  // Elimina el cliente seleccionado de la tabla y la lista de clientes.
+  // Si no hay selección, muestra un error. Si hay, pide confirmación y elimina.
   private void eliminarCliente() {
     int fila = tablaClientes.getSelectedRow();
     if (fila == -1) {
       mostrarError("Debe seleccionar un cliente para eliminar");
       return;
     }
-
     String cedula = (String) tablaClientes.getValueAt(fila, 1);
-    ClienteMensual cliente = datos.buscarCliente(cedula);
-    if (cliente != null) {
-      datos.getClientes().remove(cliente);
-      actualizarTabla();
-      limpiarCampos();
-      mostrarExito("Cliente eliminado exitosamente");
+    int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar el cliente?",
+        "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+    if (confirm == JOptionPane.YES_OPTION) {
+      ClienteMensual cliente = datos.buscarCliente(cedula);
+      if (cliente != null) {
+        datos.getClientes().remove(cliente);
+        actualizarTabla();
+        limpiarCampos();
+        mostrarExito("Cliente eliminado exitosamente");
+      }
     }
   }
 
+  // Limpia todos los campos del formulario y el estado.
   private void limpiarCampos() {
     txtNombre.setText("");
     txtCedula.setText("");
@@ -211,6 +288,7 @@ public class VentanaClientes extends JPanel {
     lblEstado.setText(" ");
   }
 
+  // Carga los datos del cliente seleccionado en los campos del formulario.
   private void cargarClienteSeleccionado(int fila) {
     txtNombre.setText((String) tablaClientes.getValueAt(fila, 0));
     txtCedula.setText((String) tablaClientes.getValueAt(fila, 1));

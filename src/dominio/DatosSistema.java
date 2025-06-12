@@ -1,8 +1,11 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 
+// Clase singleton que almacena y gestiona todos los datos del sistema
 public class DatosSistema implements Serializable {
+  // Instancia única del sistema
   private static DatosSistema instancia;
+  // Listas de entidades principales
   private ArrayList<ClienteMensual> clientes;
   private ArrayList<Vehiculo> vehiculos;
   private ArrayList<Empleado> empleados;
@@ -11,6 +14,7 @@ public class DatosSistema implements Serializable {
   private ArrayList<Salida> salidas;
   private ArrayList<ServicioAdicional> servicios;
 
+  // Constructor privado para patrón singleton
   private DatosSistema() {
     this.clientes = new ArrayList<>();
     this.vehiculos = new ArrayList<>();
@@ -24,6 +28,7 @@ public class DatosSistema implements Serializable {
     inicializarDatosEjemplo();
   }
 
+  // Devuelve la instancia única del sistema
   public static DatosSistema getInstancia() {
     if (instancia == null) {
       instancia = new DatosSistema();
@@ -31,7 +36,7 @@ public class DatosSistema implements Serializable {
     return instancia;
   }
 
-  // Getters y Setters
+  // Getters y Setters para las listas de entidades
   public ArrayList<ClienteMensual> getClientes() {
     return clientes;
   }
@@ -88,7 +93,7 @@ public class DatosSistema implements Serializable {
     this.servicios = servicios;
   }
 
-  // Métodos para agregar elementos
+  // Métodos para agregar entidades a las listas
   public void agregarCliente(ClienteMensual cliente) {
     this.clientes.add(cliente);
   }
@@ -117,7 +122,7 @@ public class DatosSistema implements Serializable {
     this.servicios.add(servicio);
   }
 
-  // Métodos para buscar elementos
+  // Métodos para buscar entidades por identificador único
   public ClienteMensual buscarCliente(String cedula) {
     for (ClienteMensual cliente : clientes) {
       if (cliente.esIgual(cedula)) {
@@ -145,6 +150,15 @@ public class DatosSistema implements Serializable {
     return null;
   }
 
+  // Elimina un vehículo por matrícula
+  public void eliminarVehiculo(String matricula) {
+    Vehiculo v = buscarVehiculo(matricula);
+    if (v != null) {
+      vehiculos.remove(v);
+    }
+  }
+
+  // Devuelve un resumen del sistema
   @Override
   public String toString() {
     return "DatosSistema{" + "clientes=" + clientes.size() +
