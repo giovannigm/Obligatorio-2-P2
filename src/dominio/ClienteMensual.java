@@ -68,8 +68,6 @@ public class ClienteMensual implements Serializable {
 
   @Override
   public String toString() {
-    return "ClienteMensual{" + "nombre=" + nombre + ", cedula=" + cedula +
-        ", direccion=" + direccion + ", celular=" + celular +
-        ", anioAlta=" + anioAlta + '}';
+    return nombre + " - " + cedula;
   }
 }
