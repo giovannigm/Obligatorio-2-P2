@@ -1,19 +1,16 @@
 import javax.swing.*;
 import java.awt.*;
-import java.util.Random;
 
 // VentanaMiniJuego: minijuego de Piedra, Papel o Tijera en Swing
 public class VentanaMiniJuego extends JFrame {
-    // Opciones posibles para el juego
-    private static final String[] OPCIONES = {"Piedra", "Papel", "Tijera"};
     // Etiqueta que muestra el estado de la jugada actual
     private JLabel lblEstado;
     // Etiqueta que muestra la cantidad de victorias
     private JLabel lblVictorias;
     // Botón para reiniciar el contador de victorias
     private JButton btnReiniciar;
-    // Generador de jugadas aleatorias para la PC
-    private Random random = new Random();
+    // Instancia de la clase de dominio que maneja la lógica del juego
+    private MiniJuegoPPT miniJuego = new MiniJuegoPPT();
     // Contador de victorias del usuario
     private int victorias = 0;
 
@@ -28,14 +25,14 @@ public class VentanaMiniJuego extends JFrame {
         JPanel panelBotones = new JPanel(new GridLayout(1, 3, 10, 10));
         panelBotones.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30)); // margen
         panelBotones.setPreferredSize(new Dimension(320, 50)); // más fino
-        for (int i = 0; i < OPCIONES.length; i++) {
-            JButton btn = new JButton(OPCIONES[i]);
+        for (int i = 0; i < MiniJuegoPPT.OPCIONES.length; i++) {
+            JButton btn = new JButton(MiniJuegoPPT.OPCIONES[i]);
             btn.setFocusPainted(false);
             btn.setFont(new Font("Arial", Font.BOLD, 16));
             btn.setBackground(new Color(230, 230, 250));
             btn.setBorder(BorderFactory.createLineBorder(new Color(120, 120, 180), 2, true));
             int eleccionUsuario = i;
-            // Al hacer clic, se juega la ronda con la opción elegida
+            // Al hacer clic, se juega la ronda con la opción elegida (la máquina elige su opción aleatoriamente en jugar())
             btn.addActionListener(e -> jugar(eleccionUsuario));
             panelBotones.add(btn);
         }
@@ -73,21 +70,19 @@ public class VentanaMiniJuego extends JFrame {
 
     // Lógica de una jugada: compara la elección del usuario y la PC, actualiza el estado y muestra el resultado
     private void jugar(int eleccionUsuario) {
-        int eleccionPC = random.nextInt(3);
-        String jugadaUsuario = OPCIONES[eleccionUsuario];
-        String jugadaPC = OPCIONES[eleccionPC];
+        int eleccionPC = miniJuego.jugadaPC();
+        String jugadaUsuario = MiniJuegoPPT.OPCIONES[eleccionUsuario];
+        String jugadaPC = MiniJuegoPPT.OPCIONES[eleccionPC];
+        int resultado = miniJuego.resultado(eleccionUsuario, eleccionPC);
         String mensaje;
-        if (eleccionUsuario == eleccionPC) {
+        if (resultado == 0) {
             mensaje = "¡Empate!";
-        } else if ((eleccionUsuario == 0 && eleccionPC == 2) ||
-                   (eleccionUsuario == 1 && eleccionPC == 0) ||
-                   (eleccionUsuario == 2 && eleccionPC == 1)) {
+        } else if (resultado == 1) {
             victorias++;
             mensaje = "¡Ganaste!";
         } else {
-            mensaje = "Perdiste";
+            mensaje = "¡Perdiste!";
         }
-        // Muestra la jugada de ambos y el resultado
         lblEstado.setText("Tú: " + jugadaUsuario + " | PC: " + jugadaPC);
         lblVictorias.setText("Victorias: " + victorias);
         JOptionPane.showMessageDialog(this, mensaje, "Resultado", JOptionPane.INFORMATION_MESSAGE);
