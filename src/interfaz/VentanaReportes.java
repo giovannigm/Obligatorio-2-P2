@@ -3,6 +3,7 @@ import java.awt.*;
 
 public class VentanaReportes extends JPanel {
     private JTabbedPane tabbedPane;
+
     public VentanaReportes(boolean modoOscuro) {
         setLayout(new BorderLayout());
         tabbedPane = new JTabbedPane();
@@ -15,9 +16,9 @@ public class VentanaReportes extends JPanel {
         JPanel panel3 = new JPanel();
         panel3.add(new JLabel("Reporte 3"));
 
-        tabbedPane.addTab("Reporte 1", panel1);
-        tabbedPane.addTab("Reporte 2", panel2);
-        tabbedPane.addTab("Reporte 3", panel3);
+        tabbedPane.addTab("Historial", panel1);
+        tabbedPane.addTab("Movimientos", panel2);
+        tabbedPane.addTab("Estadísticas generales", panel3);
 
         add(tabbedPane, BorderLayout.CENTER);
         aplicarModoOscuro(modoOscuro);
