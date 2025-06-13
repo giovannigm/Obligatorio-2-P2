@@ -12,15 +12,15 @@ public class VentanaEmpleados extends JPanel {
   private DefaultTableModel modelo;
   private JScrollPane scrollTabla;
   private JLabel lblEstado;
-  private DatosSistema datos;
+  private ControladorSistema controlador;
   private boolean modoOscuro;
   private JLabel lblNombre;
   private JLabel lblCedula;
   private JLabel lblDireccion;
 
-  public VentanaEmpleados(boolean modoOscuro) {
+  public VentanaEmpleados(boolean modoOscuro, ControladorSistema controlador) {
     this.modoOscuro = modoOscuro;
-    this.datos = DatosSistema.getInstancia();
+    this.controlador = controlador;
     initComponents();
     aplicarEstilos();
     actualizarTabla();
@@ -135,7 +135,7 @@ public class VentanaEmpleados extends JPanel {
 
   private void actualizarTabla() {
     modelo.setRowCount(0);
-    ArrayList<Empleado> empleados = datos.getEmpleados();
+    ArrayList<Empleado> empleados = controlador.getEmpleados();
     for (Empleado emp : empleados) {
       modelo.addRow(
           new Object[] { emp.getNombre(), emp.getCedula(), emp.getDireccion(), emp.getNumeroEmpleado() });
@@ -143,62 +143,57 @@ public class VentanaEmpleados extends JPanel {
   }
 
   private void agregarEmpleado() {
-    String nombre = txtNombre.getText().trim();
-    String cedula = txtCedula.getText().trim();
-    String direccion = txtDireccion.getText().trim();
-    if (nombre.isEmpty() || cedula.isEmpty() || direccion.isEmpty()) {
-      mostrarError("Todos los campos son obligatorios.");
-      return;
+    try {
+      // Capturar datos del formulario
+      String nombre = txtNombre.getText().trim();
+      String cedula = txtCedula.getText().trim();
+      String direccion = txtDireccion.getText().trim();
+
+      controlador.agregarEmpleado(nombre, cedula, direccion);
+
+      // Actualizar interfaz
+      actualizarTabla();
+      limpiarCampos();
+      mostrarExito("Empleado agregado correctamente.");
+    } catch (IllegalArgumentException e) {
+      mostrarError(e.getMessage());
     }
-    // Validar cédula única
-    for (Empleado emp : datos.getEmpleados()) {
-      if (emp.getCedula().equals(cedula)) {
-        mostrarError("Ya existe un empleado con esa cédula.");
-        return;
-      }
-    }
-    // Calcular número de empleado automático
-    int nroEmpleado = 1;
-    ArrayList<Empleado> empleados = datos.getEmpleados();
-    if (!empleados.isEmpty()) {
-      nroEmpleado = empleados.stream().mapToInt(Empleado::getNumeroEmpleado).max().orElse(0) + 1;
-    }
-    Empleado nuevo = new Empleado(nombre, cedula, direccion, nroEmpleado);
-    datos.agregarEmpleado(nuevo);
-    actualizarTabla();
-    limpiarCampos();
-    mostrarExito("Empleado agregado correctamente.");
   }
 
-  // Elimina el empleado seleccionado de la tabla y la lista de empleados.
-  // Si no hay selección, muestra un error. Si hay, pide confirmación y elimina.
   private void eliminarEmpleado() {
     int fila = tablaEmpleados.getSelectedRow();
     if (fila == -1) {
       mostrarError("Seleccione un empleado para eliminar.");
       return;
     }
+
     String cedula = (String) modelo.getValueAt(fila, 1);
     int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar el empleado?",
         "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+
     if (confirm == JOptionPane.YES_OPTION) {
-      ArrayList<Empleado> empleados = datos.getEmpleados();
-      empleados.removeIf(emp -> emp.getCedula().equals(cedula));
-      actualizarTabla();
-      limpiarCampos();
-      mostrarExito("Empleado eliminado.");
+      try {
+        // Delegar la lógica al controlador
+        controlador.eliminarEmpleado(cedula);
+
+        // Actualizar interfaz
+        actualizarTabla();
+        limpiarCampos();
+        mostrarExito("Empleado eliminado.");
+      } catch (IllegalArgumentException e) {
+        mostrarError(e.getMessage());
+      }
     }
   }
 
-  // Limpia todos los campos del formulario y el estado.
   private void limpiarCampos() {
     txtNombre.setText("");
     txtCedula.setText("");
     txtDireccion.setText("");
     tablaEmpleados.clearSelection();
+    lblEstado.setText(" ");
   }
 
-  // Carga los datos del empleado seleccionado en los campos del formulario.
   private void cargarEmpleadoSeleccionado(int fila) {
     txtNombre.setText((String) modelo.getValueAt(fila, 0));
     txtCedula.setText((String) modelo.getValueAt(fila, 1));
@@ -206,18 +201,19 @@ public class VentanaEmpleados extends JPanel {
   }
 
   private void mostrarError(String mensaje) {
+    lblEstado.setText("Error: " + mensaje);
     lblEstado.setForeground(Color.RED);
-    lblEstado.setText(mensaje);
   }
 
   private void mostrarExito(String mensaje) {
-    lblEstado.setForeground(new Color(0, 128, 0));
     lblEstado.setText(mensaje);
+    lblEstado.setForeground(Color.GREEN);
   }
 
   private void aplicarEstilos() {
     Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
     Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
+
     setBackground(fondo);
     for (Component c : getComponents()) {
       if (c instanceof JPanel) {
@@ -227,20 +223,17 @@ public class VentanaEmpleados extends JPanel {
         }
       }
     }
-    if (lblNombre != null)
-      lblNombre.setForeground(texto);
-    if (lblCedula != null)
-      lblCedula.setForeground(texto);
-    if (lblDireccion != null)
-      lblDireccion.setForeground(texto);
-    if (tablaEmpleados != null) {
-      tablaEmpleados.setBackground(fondo);
-      tablaEmpleados.setForeground(texto);
-      tablaEmpleados.getTableHeader().setBackground(fondo);
-      tablaEmpleados.getTableHeader().setForeground(texto);
-    }
-    if (lblEstado != null)
-      lblEstado.setForeground(texto);
+
+    // Seteamos explícitamente el color de los labels del formulario
+    lblNombre.setForeground(texto);
+    lblCedula.setForeground(texto);
+    lblDireccion.setForeground(texto);
+
+    tablaEmpleados.setBackground(fondo);
+    tablaEmpleados.setForeground(texto);
+    tablaEmpleados.getTableHeader().setBackground(fondo);
+    tablaEmpleados.getTableHeader().setForeground(texto);
+    lblEstado.setForeground(texto);
   }
 
   public void setModoOscuro(boolean modoOscuro) {

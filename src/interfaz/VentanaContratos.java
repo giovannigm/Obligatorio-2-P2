@@ -11,13 +11,13 @@ public class VentanaContratos extends JPanel {
   private JTable tablaContratos;
   private DefaultTableModel modelo;
   private JLabel lblEstado;
-  private DatosSistema datos;
+  private ControladorSistema controlador;
   private boolean modoOscuro;
   private Contrato contratoSeleccionado;
 
-  public VentanaContratos(boolean modoOscuro) {
+  public VentanaContratos(boolean modoOscuro, ControladorSistema controlador) {
     this.modoOscuro = modoOscuro;
-    this.datos = DatosSistema.getInstancia();
+    this.controlador = controlador;
     initComponents();
     actualizarTabla();
     actualizarCombos();
@@ -114,20 +114,20 @@ public class VentanaContratos extends JPanel {
     cmbVehiculos.removeAllItems();
     cmbEmpleados.removeAllItems();
 
-    for (ClienteMensual cliente : datos.getClientes()) {
+    for (ClienteMensual cliente : controlador.getClientes()) {
       cmbClientes.addItem(cliente);
     }
-    for (Vehiculo vehiculo : datos.getVehiculos()) {
+    for (Vehiculo vehiculo : controlador.getVehiculos()) {
       cmbVehiculos.addItem(vehiculo);
     }
-    for (Empleado empleado : datos.getEmpleados()) {
+    for (Empleado empleado : controlador.getEmpleados()) {
       cmbEmpleados.addItem(empleado);
     }
   }
 
   public void actualizarTabla() {
     modelo.setRowCount(0);
-    ArrayList<Contrato> contratos = datos.getContratos();
+    ArrayList<Contrato> contratos = controlador.getContratos();
     for (Contrato contrato : contratos) {
       Object[] fila = {
           contrato.getIdContrato(),
@@ -148,36 +148,20 @@ public class VentanaContratos extends JPanel {
 
   private void agregarContrato() {
     try {
+      // Capturar datos del formulario
       ClienteMensual cliente = (ClienteMensual) cmbClientes.getSelectedItem();
       Vehiculo vehiculo = (Vehiculo) cmbVehiculos.getSelectedItem();
       Empleado empleado = (Empleado) cmbEmpleados.getSelectedItem();
-      double valorMensual = Double.parseDouble(txtValorMensual.getText().trim());
+      String valorMensual = txtValorMensual.getText().trim();
 
-      if (cliente == null || vehiculo == null || empleado == null) {
-        Estilos.mostrarError(lblEstado, "Todos los campos son obligatorios");
-        return;
-      }
+      controlador.agregarContrato(cliente, vehiculo, empleado, valorMensual);
 
-      if (valorMensual <= 0) {
-        Estilos.mostrarError(lblEstado, "El valor mensual debe ser mayor a 0");
-        return;
-      }
-
-      // Verificar si el vehículo ya tiene un contrato activo
-      for (Contrato contrato : datos.getContratos()) {
-        if (contrato.getVehiculo().equals(vehiculo)) {
-          Estilos.mostrarError(lblEstado, "El vehículo ya tiene un contrato activo");
-          return;
-        }
-      }
-
-      Contrato nuevoContrato = new Contrato(cliente, vehiculo, empleado, valorMensual);
-      datos.agregarContrato(nuevoContrato);
+      // Actualizar interfaz
       actualizarTabla();
       limpiarCampos();
-      Estilos.mostrarExito(lblEstado, "Contrato agregado exitosamente");
-    } catch (NumberFormatException e) {
-      Estilos.mostrarError(lblEstado, "El valor mensual debe ser un número válido");
+      mostrarExito("Contrato agregado exitosamente");
+    } catch (IllegalArgumentException e) {
+      mostrarError(e.getMessage());
     }
   }
 
@@ -193,24 +177,55 @@ public class VentanaContratos extends JPanel {
 
   private void cargarContratoSeleccionado(int fila) {
     int idContrato = (int) tablaContratos.getValueAt(fila, 0);
-    for (Contrato contrato : datos.getContratos()) {
-      if (contrato.getIdContrato() == idContrato) {
-        contratoSeleccionado = contrato;
-        cmbClientes.setSelectedItem(contrato.getCliente());
-        cmbVehiculos.setSelectedItem(contrato.getVehiculo());
-        cmbEmpleados.setSelectedItem(contrato.getEmpleado());
-        txtValorMensual.setText(String.valueOf(contrato.getValorMensual()));
-        break;
+    contratoSeleccionado = controlador.buscarContrato(idContrato);
+
+    if (contratoSeleccionado != null) {
+      cmbClientes.setSelectedItem(contratoSeleccionado.getCliente());
+      cmbVehiculos.setSelectedItem(contratoSeleccionado.getVehiculo());
+      cmbEmpleados.setSelectedItem(contratoSeleccionado.getEmpleado());
+      txtValorMensual.setText(String.valueOf(contratoSeleccionado.getValorMensual()));
+    }
+  }
+
+  private void mostrarError(String mensaje) {
+    lblEstado.setText("Error: " + mensaje);
+    lblEstado.setForeground(Color.RED);
+  }
+
+  private void mostrarExito(String mensaje) {
+    lblEstado.setText(mensaje);
+    lblEstado.setForeground(Color.GREEN);
+  }
+
+  private void aplicarEstilos() {
+    Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
+    Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
+
+    setBackground(fondo);
+    for (Component c : getComponents()) {
+      if (c instanceof JPanel) {
+        c.setBackground(fondo);
+        for (Component child : ((JPanel) c).getComponents()) {
+          child.setBackground(fondo);
+        }
       }
     }
+
+    tablaContratos.setBackground(fondo);
+    tablaContratos.setForeground(texto);
+    tablaContratos.getTableHeader().setBackground(fondo);
+    tablaContratos.getTableHeader().setForeground(texto);
+    lblEstado.setForeground(texto);
+    cmbClientes.setBackground(fondo);
+    cmbClientes.setForeground(texto);
+    cmbVehiculos.setBackground(fondo);
+    cmbVehiculos.setForeground(texto);
+    cmbEmpleados.setBackground(fondo);
+    cmbEmpleados.setForeground(texto);
   }
 
   public void setModoOscuro(boolean modoOscuro) {
     this.modoOscuro = modoOscuro;
     aplicarEstilos();
-  }
-
-  private void aplicarEstilos() {
-    Estilos.aplicarEstilos(this, modoOscuro);
   }
 }

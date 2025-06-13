@@ -1,10 +1,8 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 
-// Clase singleton que almacena y gestiona todos los datos del sistema
+// Clase simple que almacena y gestiona todos los datos del sistema
 public class DatosSistema implements Serializable {
-  // Instancia única del sistema
-  private static DatosSistema instancia;
   // Listas de entidades principales
   private ArrayList<ClienteMensual> clientes;
   private ArrayList<Vehiculo> vehiculos;
@@ -14,8 +12,8 @@ public class DatosSistema implements Serializable {
   private ArrayList<Salida> salidas;
   private ArrayList<ServicioAdicional> servicios;
 
-  // Constructor privado para patrón singleton
-  private DatosSistema() {
+  // Constructor público simple
+  public DatosSistema() {
     this.clientes = new ArrayList<>();
     this.vehiculos = new ArrayList<>();
     this.empleados = new ArrayList<>();
@@ -23,17 +21,6 @@ public class DatosSistema implements Serializable {
     this.entradas = new ArrayList<>();
     this.salidas = new ArrayList<>();
     this.servicios = new ArrayList<>();
-
-    // Inicializar datos de ejemplo
-    inicializarDatosEjemplo();
-  }
-
-  // Devuelve la instancia única del sistema
-  public static DatosSistema getInstancia() {
-    if (instancia == null) {
-      instancia = new DatosSistema();
-    }
-    return instancia;
   }
 
   // Getters y Setters para las listas de entidades
@@ -168,32 +155,5 @@ public class DatosSistema implements Serializable {
         ", entradas=" + entradas.size() +
         ", salidas=" + salidas.size() +
         ", servicios=" + servicios.size() + '}';
-  }
-
-  // Método para inicializar datos de ejemplo
-  private void inicializarDatosEjemplo() {
-    // Agregar clientes de ejemplo
-    agregarCliente(new ClienteMensual("Juan Pérez", "12345678", "Av. 18 de Julio 1234", "099123456", 2020));
-    agregarCliente(new ClienteMensual("María García", "87654321", "Bulevar Artigas 567", "098765432", 2021));
-    agregarCliente(new ClienteMensual("Carlos López", "11223344", "Rambla República 890", "097112233", 2019));
-    agregarCliente(new ClienteMensual("Ana Rodríguez", "55667788", "Av. Italia 2345", "096556677", 2022));
-    agregarCliente(new ClienteMensual("Luis Martínez", "99887766", "Av. Garzón 678", "095998877", 2023));
-
-    // Agregar vehículos de ejemplo
-    agregarVehiculo(new Vehiculo("ABC1234", "Toyota", "Corolla", "Bueno"));
-    agregarVehiculo(new Vehiculo("XYZ5678", "Honda", "Civic", "Bueno"));
-    agregarVehiculo(new Vehiculo("DEF9012", "Ford", "Focus", "Bueno"));
-    agregarVehiculo(new Vehiculo("GHI3456", "Chevrolet", "Cruze", "Bueno"));
-    agregarVehiculo(new Vehiculo("JKL7890", "Volkswagen", "Golf", "Bueno"));
-    agregarVehiculo(new Vehiculo("MNO1234", "Nissan", "Sentra", "Bueno"));
-    agregarVehiculo(new Vehiculo("PQR5678", "Hyundai", "Elantra", "Bueno"));
-    agregarVehiculo(new Vehiculo("STU9012", "Kia", "Rio", "Bueno"));
-
-    // Agregar empleados de ejemplo
-    agregarEmpleado(new Empleado("Roberto Silva", "11111111", "Av. Centenario 123", 1001));
-    agregarEmpleado(new Empleado("Carmen Fernández", "22222222", "Bulevar España 456", 1002));
-    agregarEmpleado(new Empleado("Miguel Torres", "33333333", "Av. Rivera 789", 1003));
-    agregarEmpleado(new Empleado("Elena Morales", "44444444", "Rambla Wilson 012", 1004));
-    agregarEmpleado(new Empleado("Diego Herrera", "55555555", "Av. Agraciada 345", 1005));
   }
 }

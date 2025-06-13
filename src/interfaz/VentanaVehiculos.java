@@ -16,13 +16,13 @@ public class VentanaVehiculos extends JPanel {
   private JLabel lblMarca;
   private JLabel lblModelo;
   private JLabel lblEstadoVehiculo;
-  private DatosSistema datos;
+  private ControladorSistema controlador;
   private boolean modoOscuro;
   private Vehiculo vehiculoSeleccionado;
 
-  public VentanaVehiculos(boolean modoOscuro) {
+  public VentanaVehiculos(boolean modoOscuro, ControladorSistema controlador) {
     this.modoOscuro = modoOscuro;
-    this.datos = DatosSistema.getInstancia();
+    this.controlador = controlador;
     initComponents();
     actualizarTabla();
   }
@@ -178,7 +178,7 @@ public class VentanaVehiculos extends JPanel {
 
   private void actualizarTabla() {
     modelo.setRowCount(0);
-    ArrayList<Vehiculo> vehiculos = datos.getVehiculos();
+    ArrayList<Vehiculo> vehiculos = controlador.getVehiculos();
     for (Vehiculo vehiculo : vehiculos) {
       Object[] fila = {
           vehiculo.getMatricula(),
@@ -191,46 +191,51 @@ public class VentanaVehiculos extends JPanel {
   }
 
   private void agregarVehiculo() {
-    String matricula = txtMatricula.getText().trim();
-    String marca = txtMarca.getText().trim();
-    String modelo = txtModelo.getText().trim();
-    String estado = (String) cmbEstado.getSelectedItem();
+    try {
+      // Capturar datos del formulario
+      String matricula = txtMatricula.getText().trim();
+      String marca = txtMarca.getText().trim();
+      String modelo = txtModelo.getText().trim();
+      String estado = (String) cmbEstado.getSelectedItem();
 
-    if (matricula.isEmpty() || marca.isEmpty() || modelo.isEmpty()) {
-      mostrarError("Todos los campos son obligatorios");
-      return;
+      // Delegar la lógica al controlador
+      controlador.agregarVehiculo(matricula, marca, modelo, estado);
+
+      // Actualizar interfaz
+      actualizarTabla();
+      limpiarCampos();
+      mostrarExito("Vehículo agregado exitosamente");
+    } catch (IllegalArgumentException e) {
+      mostrarError(e.getMessage());
     }
-
-    if (datos.buscarVehiculo(matricula) != null) {
-      mostrarError("Ya existe un vehículo con esa matrícula");
-      return;
-    }
-
-    Vehiculo nuevoVehiculo = new Vehiculo(matricula, marca, modelo, estado);
-    datos.agregarVehiculo(nuevoVehiculo);
-    actualizarTabla();
-    limpiarCampos();
-    mostrarExito("Vehículo agregado exitosamente");
   }
 
-  // Elimina el vehículo seleccionado de la tabla y la lista de vehículos.
-  // Si no hay selección, muestra un error. Si hay, pide confirmación y elimina.
   private void eliminarVehiculo() {
-    if (vehiculoSeleccionado == null) {
+    int fila = tablaVehiculos.getSelectedRow();
+    if (fila == -1) {
       mostrarError("Debe seleccionar un vehículo para eliminar");
       return;
     }
+
+    String matricula = (String) tablaVehiculos.getValueAt(fila, 0);
     int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar el vehículo?",
         "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+
     if (confirm == JOptionPane.YES_OPTION) {
-      datos.eliminarVehiculo(vehiculoSeleccionado.getMatricula());
-      actualizarTabla();
-      limpiarCampos();
-      mostrarExito("Vehículo eliminado exitosamente");
+      try {
+        // Delegar la lógica al controlador
+        controlador.eliminarVehiculo(matricula);
+
+        // Actualizar interfaz
+        actualizarTabla();
+        limpiarCampos();
+        mostrarExito("Vehículo eliminado exitosamente");
+      } catch (IllegalArgumentException e) {
+        mostrarError(e.getMessage());
+      }
     }
   }
 
-  // Limpia todos los campos del formulario y el estado.
   private void limpiarCampos() {
     txtMatricula.setText("");
     txtMarca.setText("");
@@ -241,16 +246,23 @@ public class VentanaVehiculos extends JPanel {
     lblEstado.setText(" ");
   }
 
-  // Carga los datos del vehículo seleccionado en los campos del formulario.
   private void cargarVehiculoSeleccionado(int fila) {
     String matricula = (String) tablaVehiculos.getValueAt(fila, 0);
-    vehiculoSeleccionado = datos.buscarVehiculo(matricula);
+    vehiculoSeleccionado = controlador.buscarVehiculo(matricula);
 
     if (vehiculoSeleccionado != null) {
       txtMatricula.setText(vehiculoSeleccionado.getMatricula());
       txtMarca.setText(vehiculoSeleccionado.getMarca());
       txtModelo.setText(vehiculoSeleccionado.getModelo());
-      cmbEstado.setSelectedItem(vehiculoSeleccionado.getEstado());
+
+      // Seleccionar el estado en el combo
+      String estado = vehiculoSeleccionado.getEstado();
+      for (int i = 0; i < cmbEstado.getItemCount(); i++) {
+        if (cmbEstado.getItemAt(i).equals(estado)) {
+          cmbEstado.setSelectedIndex(i);
+          break;
+        }
+      }
     }
   }
 

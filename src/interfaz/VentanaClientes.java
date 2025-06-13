@@ -13,7 +13,7 @@ public class VentanaClientes extends JPanel {
   private JTable tablaClientes;
   private DefaultTableModel modelo;
   private JLabel lblEstado;
-  private DatosSistema datos;
+  private ControladorSistema controlador;
   private boolean modoOscuro;
   private JLabel lblNombre;
   private JLabel lblCedula;
@@ -21,9 +21,9 @@ public class VentanaClientes extends JPanel {
   private JLabel lblCelular;
   private JLabel lblAnioAlta;
 
-  public VentanaClientes(boolean modoOscuro) {
+  public VentanaClientes(boolean modoOscuro, ControladorSistema controlador) {
     this.modoOscuro = modoOscuro;
-    this.datos = DatosSistema.getInstancia();
+    this.controlador = controlador;
     initComponents();
     actualizarTabla();
   }
@@ -214,7 +214,7 @@ public class VentanaClientes extends JPanel {
 
   private void actualizarTabla() {
     modelo.setRowCount(0);
-    ArrayList<ClienteMensual> clientes = datos.getClientes();
+    ArrayList<ClienteMensual> clientes = controlador.getClientes();
     for (ClienteMensual cliente : clientes) {
       Object[] fila = {
           cliente.getNombre(),
@@ -229,55 +229,49 @@ public class VentanaClientes extends JPanel {
 
   private void agregarCliente() {
     try {
+      // Capturar datos del formulario
       String nombre = txtNombre.getText().trim();
       String cedula = txtCedula.getText().trim();
       String direccion = txtDireccion.getText().trim();
       String celular = txtCelular.getText().trim();
-      int anioAlta = Integer.parseInt(txtAnioAlta.getText().trim());
+      String anioAlta = txtAnioAlta.getText().trim();
 
-      if (nombre.isEmpty() || cedula.isEmpty() || direccion.isEmpty() || celular.isEmpty()) {
-        mostrarError("Todos los campos son obligatorios");
-        return;
-      }
+      controlador.agregarCliente(nombre, cedula, direccion, celular, anioAlta);
 
-      if (datos.buscarCliente(cedula) != null) {
-        mostrarError("Ya existe un cliente con esa cédula");
-        return;
-      }
-
-      ClienteMensual nuevoCliente = new ClienteMensual(nombre, cedula, direccion, celular, anioAlta);
-      datos.agregarCliente(nuevoCliente);
+      // Actualizar interfaz
       actualizarTabla();
       limpiarCampos();
       mostrarExito("Cliente agregado exitosamente");
-    } catch (NumberFormatException e) {
-      mostrarError("El año de alta debe ser un número válido");
+    } catch (IllegalArgumentException e) {
+      mostrarError(e.getMessage());
     }
   }
 
-  // Elimina el cliente seleccionado de la tabla y la lista de clientes.
-  // Si no hay selección, muestra un error. Si hay, pide confirmación y elimina.
   private void eliminarCliente() {
     int fila = tablaClientes.getSelectedRow();
     if (fila == -1) {
       mostrarError("Debe seleccionar un cliente para eliminar");
       return;
     }
+
     String cedula = (String) tablaClientes.getValueAt(fila, 1);
     int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar el cliente?",
         "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+
     if (confirm == JOptionPane.YES_OPTION) {
-      ClienteMensual cliente = datos.buscarCliente(cedula);
-      if (cliente != null) {
-        datos.getClientes().remove(cliente);
+      try {
+        controlador.eliminarCliente(cedula);
+
+        // Actualizar interfaz
         actualizarTabla();
         limpiarCampos();
         mostrarExito("Cliente eliminado exitosamente");
+      } catch (IllegalArgumentException e) {
+        mostrarError(e.getMessage());
       }
     }
   }
 
-  // Limpia todos los campos del formulario y el estado.
   private void limpiarCampos() {
     txtNombre.setText("");
     txtCedula.setText("");
@@ -288,7 +282,6 @@ public class VentanaClientes extends JPanel {
     lblEstado.setText(" ");
   }
 
-  // Carga los datos del cliente seleccionado en los campos del formulario.
   private void cargarClienteSeleccionado(int fila) {
     txtNombre.setText((String) tablaClientes.getValueAt(fila, 0));
     txtCedula.setText((String) tablaClientes.getValueAt(fila, 1));
