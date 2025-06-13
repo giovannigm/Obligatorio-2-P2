@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class ControladorSistema {
   private ArrayList<ClienteMensual> clientes;
@@ -125,6 +127,73 @@ public class ControladorSistema {
       if (contrato.getVehiculo().equals(vehiculo)) {
         throw new IllegalArgumentException("El vehículo ya tiene un contrato activo");
       }
+    }
+
+    return true;
+  }
+
+  public boolean validarCamposServicioAdicional(String tipo, String fecha, String hora, Vehiculo vehiculo,
+      Empleado empleado, String costo) {
+    if (tipo == null || tipo.trim().isEmpty()) {
+      throw new IllegalArgumentException("Debe seleccionar un tipo de servicio");
+    }
+    if (fecha == null || fecha.trim().isEmpty()) {
+      throw new IllegalArgumentException("La fecha es obligatoria");
+    }
+    if (hora == null || hora.trim().isEmpty()) {
+      throw new IllegalArgumentException("La hora es obligatoria");
+    }
+    if (vehiculo == null) {
+      throw new IllegalArgumentException("Debe seleccionar un vehículo");
+    }
+    if (empleado == null) {
+      throw new IllegalArgumentException("Debe seleccionar un empleado");
+    }
+    if (costo == null || costo.trim().isEmpty()) {
+      throw new IllegalArgumentException("El costo es obligatorio");
+    }
+
+    // Validar formato de fecha (dd/MM/yyyy)
+    try {
+      String[] partesFecha = fecha.trim().split("/");
+      if (partesFecha.length != 3) {
+        throw new IllegalArgumentException("Formato de fecha inválido. Use dd/MM/yyyy");
+      }
+      int dia = Integer.parseInt(partesFecha[0]);
+      int mes = Integer.parseInt(partesFecha[1]);
+      int anio = Integer.parseInt(partesFecha[2]);
+
+      if (dia < 1 || dia > 31 || mes < 1 || mes > 12 || anio < 1900 || anio > 2100) {
+        throw new IllegalArgumentException("Fecha inválida");
+      }
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("Formato de fecha inválido. Use dd/MM/yyyy");
+    }
+
+    // Validar formato de hora (HH:mm)
+    try {
+      String[] partesHora = hora.trim().split(":");
+      if (partesHora.length != 2) {
+        throw new IllegalArgumentException("Formato de hora inválido. Use HH:mm");
+      }
+      int horas = Integer.parseInt(partesHora[0]);
+      int minutos = Integer.parseInt(partesHora[1]);
+
+      if (horas < 0 || horas > 23 || minutos < 0 || minutos > 59) {
+        throw new IllegalArgumentException("Hora inválida");
+      }
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("Formato de hora inválido. Use HH:mm");
+    }
+
+    // Validar costo
+    try {
+      double valorCosto = Double.parseDouble(costo.trim());
+      if (valorCosto < 0) {
+        throw new IllegalArgumentException("El costo no puede ser negativo");
+      }
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("El costo debe ser un número válido");
     }
 
     return true;
@@ -293,29 +362,35 @@ public class ControladorSistema {
     return null;
   }
 
-  // ========== MÉTODOS PARA OTRAS ENTIDADES ==========
+  // ========== MÉTODOS DE GESTIÓN DE SERVICIOS ADICIONALES ==========
 
-  public void agregarEntrada(Entrada entrada) {
-    entradas.add(entrada);
+  public void agregarServicioAdicional(String tipo, String fecha, String hora, Vehiculo vehiculo, Empleado empleado,
+      String costo) {
+    // Validar campos
+    validarCamposServicioAdicional(tipo, fecha, hora, vehiculo, empleado, costo);
+
+    // Parsear fecha y hora
+    String[] partesFecha = fecha.trim().split("/");
+    int dia = Integer.parseInt(partesFecha[0]);
+    int mes = Integer.parseInt(partesFecha[1]);
+    int anio = Integer.parseInt(partesFecha[2]);
+
+    String[] partesHora = hora.trim().split(":");
+    int horas = Integer.parseInt(partesHora[0]);
+    int minutos = Integer.parseInt(partesHora[1]);
+
+    // Crear LocalDate y LocalTime
+    LocalDate fechaServicio = LocalDate.of(anio, mes, dia);
+    LocalTime horaServicio = LocalTime.of(horas, minutos);
+
+    // Crear y agregar servicio
+    double valorCosto = Double.parseDouble(costo.trim());
+    ServicioAdicional nuevoServicio = new ServicioAdicional(tipo.trim(), fechaServicio, horaServicio, vehiculo,
+        empleado, valorCosto);
+    servicios.add(nuevoServicio);
   }
 
-  public void agregarSalida(Salida salida) {
-    salidas.add(salida);
-  }
-
-  public void agregarServicio(ServicioAdicional servicio) {
-    servicios.add(servicio);
-  }
-
-  public ArrayList<Entrada> getEntradas() {
-    return new ArrayList<>(entradas);
-  }
-
-  public ArrayList<Salida> getSalidas() {
-    return new ArrayList<>(salidas);
-  }
-
-  public ArrayList<ServicioAdicional> getServicios() {
+  public ArrayList<ServicioAdicional> getServiciosAdicionales() {
     return new ArrayList<>(servicios);
   }
 
@@ -357,5 +432,23 @@ public class ControladorSistema {
     } catch (Exception e) {
       // Ignorar errores en datos de ejemplo
     }
+  }
+
+  // ========== MÉTODOS PARA OTRAS ENTIDADES ==========
+
+  public void agregarEntrada(Entrada entrada) {
+    entradas.add(entrada);
+  }
+
+  public void agregarSalida(Salida salida) {
+    salidas.add(salida);
+  }
+
+  public ArrayList<Entrada> getEntradas() {
+    return new ArrayList<>(entradas);
+  }
+
+  public ArrayList<Salida> getSalidas() {
+    return new ArrayList<>(salidas);
   }
 }

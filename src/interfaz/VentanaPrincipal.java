@@ -17,7 +17,7 @@ public class VentanaPrincipal extends JFrame {
     private JButton btnModo;
     private JMenu menuGestion, menuMov, menuVarios, menuTerminar;
     private JMenuItem itemGestionVehiculos, itemGestionClientes, itemGestionEmpleados, itemGestionContratos,
-            itemMiniJuego;
+            itemMiniJuego, itemServiciosAdicionales;
     private List<JFrame> ventanasSecundarias = new ArrayList<>();
     private ControladorSistema controlador;
 
@@ -65,7 +65,8 @@ public class VentanaPrincipal extends JFrame {
         menuMov = new JMenu("Movimientos");
         menuMov.add(new JMenuItem("Entradas"));
         menuMov.add(new JMenuItem("Salidas"));
-        menuMov.add(new JMenuItem("Servicios Adicionales"));
+        itemServiciosAdicionales = new JMenuItem("Servicios Adicionales");
+        menuMov.add(itemServiciosAdicionales);
 
         // Menú Varios
         menuVarios = new JMenu("Varios");
@@ -159,6 +160,24 @@ public class VentanaPrincipal extends JFrame {
             });
         });
 
+        // Listener para abrir VentanaServiciosAdicionales en una ventana aparte
+        itemServiciosAdicionales.addActionListener(e -> {
+            JFrame frameServicios = new JFrame("Gestión de Servicios Adicionales");
+            frameServicios.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frameServicios.setSize(700, 500);
+            frameServicios.setLocationRelativeTo(this);
+            frameServicios.setLayout(new BorderLayout());
+            VentanaServiciosAdicionales panel = new VentanaServiciosAdicionales(modoOscuro, controlador);
+            frameServicios.add(panel, BorderLayout.CENTER);
+            frameServicios.setVisible(true);
+            ventanasSecundarias.add(frameServicios);
+            frameServicios.addWindowListener(new java.awt.event.WindowAdapter() {
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    ventanasSecundarias.remove(frameServicios);
+                }
+            });
+        });
+
         // Listener para abrir VentanaMiniJuego en una ventana aparte
         itemMiniJuego.addActionListener(e -> {
             VentanaMiniJuego frameMiniJuego = new VentanaMiniJuego();
@@ -198,6 +217,10 @@ public class VentanaPrincipal extends JFrame {
                     ((VentanaVehiculos) panel).setModoOscuro(modoOscuro);
                 } else if (panel instanceof VentanaEmpleados) {
                     ((VentanaEmpleados) panel).setModoOscuro(modoOscuro);
+                } else if (panel instanceof VentanaContratos) {
+                    ((VentanaContratos) panel).setModoOscuro(modoOscuro);
+                } else if (panel instanceof VentanaServiciosAdicionales) {
+                    ((VentanaServiciosAdicionales) panel).setModoOscuro(modoOscuro);
                 }
             }
         });
