@@ -3,7 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class VentanaContratos extends JPanel {
+public class VentanaContratos extends JPanel implements ModoOscuroObserver {
   private JComboBox<ClienteMensual> cmbClientes;
   private JComboBox<Vehiculo> cmbVehiculos;
   private JComboBox<Empleado> cmbEmpleados;
@@ -227,5 +227,10 @@ public class VentanaContratos extends JPanel {
   public void setModoOscuro(boolean modoOscuro) {
     this.modoOscuro = modoOscuro;
     aplicarEstilos();
+  }
+
+  @Override
+  public void actualizarModoOscuro(boolean modoOscuro) {
+    setModoOscuro(modoOscuro);
   }
 }

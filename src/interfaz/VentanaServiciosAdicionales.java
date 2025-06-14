@@ -5,7 +5,7 @@ import java.awt.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-public class VentanaServiciosAdicionales extends JPanel {
+public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObserver {
   private JComboBox<String> cmbTipoServicio;
   private JTextField txtFecha;
   private JTextField txtHora;
@@ -369,5 +369,10 @@ public class VentanaServiciosAdicionales extends JPanel {
   public void refrescarDatos() {
     actualizarCombos();
     actualizarTabla();
+  }
+
+  @Override
+  public void actualizarModoOscuro(boolean modoOscuro) {
+    setModoOscuro(modoOscuro);
   }
 }

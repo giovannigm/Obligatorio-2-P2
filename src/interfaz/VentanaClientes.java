@@ -4,7 +4,7 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class VentanaClientes extends JPanel {
+public class VentanaClientes extends JPanel implements ModoOscuroObserver {
   private JTextField txtNombre;
   private JTextField txtCedula;
   private JTextField txtDireccion;
@@ -303,5 +303,10 @@ public class VentanaClientes extends JPanel {
   public void setModoOscuro(boolean modoOscuro) {
     this.modoOscuro = modoOscuro;
     aplicarEstilos();
+  }
+
+  @Override
+  public void actualizarModoOscuro(boolean modoOscuro) {
+    setModoOscuro(modoOscuro);
   }
 }

@@ -5,10 +5,6 @@ import java.util.ArrayList;
 
 public class VentanaPrincipal extends JFrame {
     private boolean modoOscuro = false;
-    private VentanaClientes ventanaClientes;
-    private VentanaVehiculos ventanaVehiculos;
-    private VentanaEmpleados ventanaEmpleados;
-    private VentanaContratos ventanaContratos;
     private JMenuBar menuBar;
     private JPanel panelPrincipal;
     private JButton btnModo;
@@ -17,6 +13,7 @@ public class VentanaPrincipal extends JFrame {
             itemMiniJuego, itemServiciosAdicionales;
     private List<JFrame> ventanasSecundarias = new ArrayList<>();
     private ControladorSistema controlador;
+    private List<ModoOscuroObserver> observadores = new ArrayList<>();
 
     public VentanaPrincipal() {
         try {
@@ -40,6 +37,21 @@ public class VentanaPrincipal extends JFrame {
 
         aplicarModo();
         setVisible(true);
+    }
+
+    // Métodos para Observer
+    public void agregarObservador(ModoOscuroObserver obs) {
+        observadores.add(obs);
+    }
+
+    public void eliminarObservador(ModoOscuroObserver obs) {
+        observadores.remove(obs);
+    }
+
+    private void notificarObservadores() {
+        for (ModoOscuroObserver obs : observadores) {
+            obs.actualizarModoOscuro(modoOscuro);
+        }
     }
 
     private void crearMenu() {
@@ -94,11 +106,13 @@ public class VentanaPrincipal extends JFrame {
             frameClientes.setLocationRelativeTo(this);
             frameClientes.setLayout(new BorderLayout());
             VentanaClientes panel = new VentanaClientes(modoOscuro, controlador);
+            agregarObservador(panel);
             frameClientes.add(panel, BorderLayout.CENTER);
             frameClientes.setVisible(true);
             ventanasSecundarias.add(frameClientes);
             frameClientes.addWindowListener(new java.awt.event.WindowAdapter() {
                 public void windowClosed(java.awt.event.WindowEvent e) {
+                    eliminarObservador(panel);
                     ventanasSecundarias.remove(frameClientes);
                 }
             });
@@ -112,11 +126,13 @@ public class VentanaPrincipal extends JFrame {
             frameVehiculos.setLocationRelativeTo(this);
             frameVehiculos.setLayout(new BorderLayout());
             VentanaVehiculos panel = new VentanaVehiculos(modoOscuro, controlador);
+            agregarObservador(panel);
             frameVehiculos.add(panel, BorderLayout.CENTER);
             frameVehiculos.setVisible(true);
             ventanasSecundarias.add(frameVehiculos);
             frameVehiculos.addWindowListener(new java.awt.event.WindowAdapter() {
                 public void windowClosed(java.awt.event.WindowEvent e) {
+                    eliminarObservador(panel);
                     ventanasSecundarias.remove(frameVehiculos);
                 }
             });
@@ -130,16 +146,19 @@ public class VentanaPrincipal extends JFrame {
             frameEmpleados.setLocationRelativeTo(this);
             frameEmpleados.setLayout(new BorderLayout());
             VentanaEmpleados panel = new VentanaEmpleados(modoOscuro, controlador);
+            agregarObservador(panel);
             frameEmpleados.add(panel, BorderLayout.CENTER);
             frameEmpleados.setVisible(true);
             ventanasSecundarias.add(frameEmpleados);
             frameEmpleados.addWindowListener(new java.awt.event.WindowAdapter() {
                 public void windowClosed(java.awt.event.WindowEvent e) {
+                    eliminarObservador(panel);
                     ventanasSecundarias.remove(frameEmpleados);
                 }
             });
         });
 
+        // Listener para abrir VentanaContratos en una ventana aparte
         itemGestionContratos.addActionListener(e -> {
             JFrame frameContratos = new JFrame("Gestión de Contratos");
             frameContratos.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -147,11 +166,13 @@ public class VentanaPrincipal extends JFrame {
             frameContratos.setLocationRelativeTo(this);
             frameContratos.setLayout(new BorderLayout());
             VentanaContratos panel = new VentanaContratos(modoOscuro, controlador);
+            agregarObservador(panel);
             frameContratos.add(panel, BorderLayout.CENTER);
             frameContratos.setVisible(true);
             ventanasSecundarias.add(frameContratos);
             frameContratos.addWindowListener(new java.awt.event.WindowAdapter() {
                 public void windowClosed(java.awt.event.WindowEvent e) {
+                    eliminarObservador(panel);
                     ventanasSecundarias.remove(frameContratos);
                 }
             });
@@ -165,11 +186,13 @@ public class VentanaPrincipal extends JFrame {
             frameServicios.setLocationRelativeTo(this);
             frameServicios.setLayout(new BorderLayout());
             VentanaServiciosAdicionales panel = new VentanaServiciosAdicionales(modoOscuro, controlador);
+            agregarObservador(panel);
             frameServicios.add(panel, BorderLayout.CENTER);
             frameServicios.setVisible(true);
             ventanasSecundarias.add(frameServicios);
             frameServicios.addWindowListener(new java.awt.event.WindowAdapter() {
                 public void windowClosed(java.awt.event.WindowEvent e) {
+                    eliminarObservador(panel);
                     ventanasSecundarias.remove(frameServicios);
                 }
             });
@@ -179,6 +202,10 @@ public class VentanaPrincipal extends JFrame {
         itemMiniJuego.addActionListener(e -> {
             VentanaMiniJuego frameMiniJuego = new VentanaMiniJuego();
             frameMiniJuego.setVisible(true);
+            frameMiniJuego.addWindowListener(new java.awt.event.WindowAdapter() {
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                }
+            });
         });
 
         // Listener para salir con confirmación
@@ -200,26 +227,7 @@ public class VentanaPrincipal extends JFrame {
         btnModo.addActionListener(e -> {
             modoOscuro = !modoOscuro;
             aplicarModo();
-            // Cuando se cambia el modo, también se actualizan las ventanas secundarias
-            // abiertas.
-            // Esto se hace recorriendo la lista y llamando setModoOscuro en cada panel
-            // secundario.
-            // Así, el usuario ve el cambio de color en todas las ventanas, no solo en la
-            // principal.
-            for (JFrame ventana : ventanasSecundarias) {
-                Component panel = ventana.getContentPane().getComponent(0);
-                if (panel instanceof VentanaClientes) {
-                    ((VentanaClientes) panel).setModoOscuro(modoOscuro);
-                } else if (panel instanceof VentanaVehiculos) {
-                    ((VentanaVehiculos) panel).setModoOscuro(modoOscuro);
-                } else if (panel instanceof VentanaEmpleados) {
-                    ((VentanaEmpleados) panel).setModoOscuro(modoOscuro);
-                } else if (panel instanceof VentanaContratos) {
-                    ((VentanaContratos) panel).setModoOscuro(modoOscuro);
-                } else if (panel instanceof VentanaServiciosAdicionales) {
-                    ((VentanaServiciosAdicionales) panel).setModoOscuro(modoOscuro);
-                }
-            }
+            notificarObservadores();
         });
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -269,59 +277,12 @@ public class VentanaPrincipal extends JFrame {
                 }
             }
         }
-        // Si tienes instancias de las ventanas principales con pestañas, actualiza su modo
-        if (ventanaClientes != null) {
-            ventanaClientes.setModoOscuro(modoOscuro);
-        }
-        if (ventanaVehiculos != null) {
-            ventanaVehiculos.setModoOscuro(modoOscuro);
-        }
-        if (ventanaEmpleados != null) {
-            ventanaEmpleados.setModoOscuro(modoOscuro);
-        }
-        if (ventanaContratos != null) {
-            ventanaContratos.setModoOscuro(modoOscuro);
-        }
     }
 
     // --- MODO CLARO/OSCURO EN TODAS LAS VENTANAS ---
     //
-    // 1. Se crea una lista 'ventanasSecundarias' para guardar todas las ventanas
-    // secundarias abiertas (Clientes, Vehículos, Empleados).
-    //
-    // 2. Cuando se abre una ventana secundaria, se agrega a la lista y se le agrega
-    // un WindowListener para eliminarla de la lista al cerrarse.
-    //
-    // 3. Cuando el usuario cambia el modo (claro/oscuro) con el botón, además de
-    // cambiar el modo en la ventana principal,
-    // se recorre la lista de ventanas secundarias y se llama al método
-    // setModoOscuro(modoOscuro) de cada panel secundario.
-    // Así, todas las ventanas abiertas cambian de color automáticamente.
-    //
-    // 4. Si se abre una nueva ventana, toma el modo actual automáticamente porque
-    // se le pasa el valor de 'modoOscuro' al constructor.
-    //
-    // 5. Este patrón funciona porque VentanaClientes, VentanaVehiculos y
-    // VentanaEmpleados implementan el método setModoOscuro(boolean).
-    //
-    // Ejemplo de uso en el código:
-    //
-    // btnModo.addActionListener(e -> {
-    // modoOscuro = !modoOscuro;
-    // aplicarModo();
-    // for (JFrame ventana : ventanasSecundarias) {
-    // Component panel = ventana.getContentPane().getComponent(0);
-    // if (panel instanceof VentanaClientes) {
-    // ((VentanaClientes) panel).setModoOscuro(modoOscuro);
-    // } else if (panel instanceof VentanaVehiculos) {
-    // ((VentanaVehiculos) panel).setModoOscuro(modoOscuro);
-    // } else if (panel instanceof VentanaEmpleados) {
-    // ((VentanaEmpleados) panel).setModoOscuro(modoOscuro);
-    // }
-    // }
-    // });
-    //
-    // Así, el cambio de modo se refleja en todas las ventanas abiertas.
+    // Ahora el cambio de modo se realiza únicamente notificando a los observadores
+    // registrados. Se eliminó el recorrido manual de ventanas secundarias.
     // --- FIN EXPLICACIÓN ---
 
     public static void main(String[] args) {
