@@ -196,7 +196,11 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     };
     tablaServicios = new JTable(modelo);
     tablaServicios.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    tablaServicios.setOpaque(false);
+    tablaServicios.getTableHeader().setOpaque(false);
     JScrollPane scrollPane = new JScrollPane(tablaServicios);
+    scrollPane.setOpaque(false);
+    scrollPane.getViewport().setOpaque(false);
 
     // Listener para selección en la tabla
     tablaServicios.getSelectionModel().addListSelectionListener(e -> {

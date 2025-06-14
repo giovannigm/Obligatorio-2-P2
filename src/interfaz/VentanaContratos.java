@@ -85,7 +85,12 @@ public class VentanaContratos extends JPanel implements ModoOscuroObserver {
       }
     };
     tablaContratos = new JTable(modelo);
+    tablaContratos.setOpaque(false);
+    tablaContratos.getTableHeader().setOpaque(false);
     JScrollPane scrollPane = new JScrollPane(tablaContratos);
+    scrollPane.setOpaque(false);
+    scrollPane.getViewport().setOpaque(false);
+
 
     // Listener para selección en la tabla
     tablaContratos.getSelectionModel().addListSelectionListener(e -> {
