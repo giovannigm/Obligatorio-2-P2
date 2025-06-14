@@ -5,9 +5,6 @@ import java.util.ArrayList;
 
 public class VentanaPrincipal extends JFrame {
     private boolean modoOscuro = false;
-    private JPanel panel;
-    private JTabbedPane pestañas;
-    private JPanel panelModo;
     private VentanaClientes ventanaClientes;
     private VentanaVehiculos ventanaVehiculos;
     private VentanaEmpleados ventanaEmpleados;
@@ -265,65 +262,26 @@ public class VentanaPrincipal extends JFrame {
                 for (int j = 0; j < menu.getItemCount(); j++) {
                     JMenuItem item = menu.getItem(j);
                     if (item != null) {
-                        item.setBackground(Color.WHITE); // 🔄 Siempre blanco
-                        item.setForeground(Color.BLACK);
+                        item.setBackground(fondoMenu); // Ahora respeta el modo
+                        item.setForeground(texto);
                         item.setOpaque(true);
                     }
                 }
             }
         }
+        // Si tienes instancias de las ventanas principales con pestañas, actualiza su modo
         if (ventanaClientes != null) {
-            ventanaClientes.setModoOscuro(!modoOscuro);
+            ventanaClientes.setModoOscuro(modoOscuro);
         }
         if (ventanaVehiculos != null) {
-            ventanaVehiculos.setModoOscuro(!modoOscuro);
+            ventanaVehiculos.setModoOscuro(modoOscuro);
         }
         if (ventanaEmpleados != null) {
-            ventanaEmpleados.setModoOscuro(!modoOscuro);
+            ventanaEmpleados.setModoOscuro(modoOscuro);
         }
         if (ventanaContratos != null) {
-            ventanaContratos.setModoOscuro(!modoOscuro);
+            ventanaContratos.setModoOscuro(modoOscuro);
         }
-        modoOscuro = !modoOscuro;
-    }
-
-    private void initComponents() {
-        panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-
-        // Barra de pestañas arriba
-        pestañas = new JTabbedPane();
-        ventanaClientes = new VentanaClientes(modoOscuro, controlador);
-        ventanaVehiculos = new VentanaVehiculos(modoOscuro, controlador);
-        ventanaEmpleados = new VentanaEmpleados(modoOscuro, controlador);
-        ventanaContratos = new VentanaContratos(modoOscuro, controlador);
-        pestañas.addTab("Clientes", ventanaClientes);
-        pestañas.addTab("Vehículos", ventanaVehiculos);
-        pestañas.addTab("Empleados", ventanaEmpleados);
-        pestañas.addTab("Contratos", ventanaContratos);
-        pestañas.addTab("Movimientos", new JPanel());
-        pestañas.addTab("Varios", new JPanel());
-        pestañas.addTab("Terminal", new JPanel());
-
-        // Agregar listener para actualizar comboboxes cuando se cambie a la pestaña
-        // Contratos
-        pestañas.addChangeListener(e -> {
-            if (pestañas.getSelectedComponent() == ventanaContratos) {
-                ventanaContratos.refrescarDatos();
-            }
-        });
-
-        panel.add(pestañas, BorderLayout.CENTER);
-
-        // Botón Claro/Oscuro centrado abajo
-        JButton btnModo = new JButton("Claro/Oscuro");
-        btnModo.addActionListener(e -> aplicarModo());
-        panelModo = new JPanel();
-        panelModo.setLayout(new FlowLayout(FlowLayout.CENTER));
-        panelModo.add(btnModo);
-        panel.add(panelModo, BorderLayout.SOUTH);
-
-        getContentPane().add(panel);
     }
 
     // --- MODO CLARO/OSCURO EN TODAS LAS VENTANAS ---
