@@ -19,6 +19,7 @@ public class VentanaPrincipal extends JFrame {
     private JMenuItem itemGestionVehiculos, itemGestionClientes, itemGestionEmpleados, itemGestionContratos,
             itemMiniJuego;
     private List<JFrame> ventanasSecundarias = new ArrayList<>();
+    private ControladorSistema controlador;
 
     public VentanaPrincipal() {
         try {
@@ -26,6 +27,10 @@ public class VentanaPrincipal extends JFrame {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
+        // Crear una única instancia del controlador que se compartirá entre todas las
+        // ventanas
+        this.controlador = new ControladorSistema();
 
         setTitle("Obligatorio Prog 2 - Autor: Giovanni - 288127,  Nicolas - 258264");
         setSize(600, 400);
@@ -90,7 +95,7 @@ public class VentanaPrincipal extends JFrame {
             frameClientes.setSize(600, 400);
             frameClientes.setLocationRelativeTo(this);
             frameClientes.setLayout(new BorderLayout());
-            VentanaClientes panel = new VentanaClientes(modoOscuro);
+            VentanaClientes panel = new VentanaClientes(modoOscuro, controlador);
             frameClientes.add(panel, BorderLayout.CENTER);
             frameClientes.setVisible(true);
             ventanasSecundarias.add(frameClientes);
@@ -108,7 +113,7 @@ public class VentanaPrincipal extends JFrame {
             frameVehiculos.setSize(600, 400);
             frameVehiculos.setLocationRelativeTo(this);
             frameVehiculos.setLayout(new BorderLayout());
-            VentanaVehiculos panel = new VentanaVehiculos(modoOscuro);
+            VentanaVehiculos panel = new VentanaVehiculos(modoOscuro, controlador);
             frameVehiculos.add(panel, BorderLayout.CENTER);
             frameVehiculos.setVisible(true);
             ventanasSecundarias.add(frameVehiculos);
@@ -126,7 +131,7 @@ public class VentanaPrincipal extends JFrame {
             frameEmpleados.setSize(600, 400);
             frameEmpleados.setLocationRelativeTo(this);
             frameEmpleados.setLayout(new BorderLayout());
-            VentanaEmpleados panel = new VentanaEmpleados(modoOscuro);
+            VentanaEmpleados panel = new VentanaEmpleados(modoOscuro, controlador);
             frameEmpleados.add(panel, BorderLayout.CENTER);
             frameEmpleados.setVisible(true);
             ventanasSecundarias.add(frameEmpleados);
@@ -143,7 +148,7 @@ public class VentanaPrincipal extends JFrame {
             frameContratos.setSize(600, 400);
             frameContratos.setLocationRelativeTo(this);
             frameContratos.setLayout(new BorderLayout());
-            VentanaContratos panel = new VentanaContratos(modoOscuro);
+            VentanaContratos panel = new VentanaContratos(modoOscuro, controlador);
             frameContratos.add(panel, BorderLayout.CENTER);
             frameContratos.setVisible(true);
             ventanasSecundarias.add(frameContratos);
@@ -265,10 +270,10 @@ public class VentanaPrincipal extends JFrame {
 
         // Barra de pestañas arriba
         pestañas = new JTabbedPane();
-        ventanaClientes = new VentanaClientes(modoOscuro);
-        ventanaVehiculos = new VentanaVehiculos(modoOscuro);
-        ventanaEmpleados = new VentanaEmpleados(modoOscuro);
-        ventanaContratos = new VentanaContratos(modoOscuro);
+        ventanaClientes = new VentanaClientes(modoOscuro, controlador);
+        ventanaVehiculos = new VentanaVehiculos(modoOscuro, controlador);
+        ventanaEmpleados = new VentanaEmpleados(modoOscuro, controlador);
+        ventanaContratos = new VentanaContratos(modoOscuro, controlador);
         pestañas.addTab("Clientes", ventanaClientes);
         pestañas.addTab("Vehículos", ventanaVehiculos);
         pestañas.addTab("Empleados", ventanaEmpleados);
