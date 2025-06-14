@@ -17,17 +17,15 @@ public class VentanaVehiculos extends JPanel {
   private JLabel lblModelo;
   private JLabel lblEstadoVehiculo;
   private DatosSistema datos;
-  private boolean modoOscuro;
   private Vehiculo vehiculoSeleccionado;
 
   public VentanaVehiculos(boolean modoOscuro) {
-    this.modoOscuro = modoOscuro;
     this.datos = DatosSistema.getInstancia();
-    initComponents();
+    initComponents(modoOscuro);
     actualizarTabla();
   }
 
-  private void initComponents() {
+  private void initComponents(boolean modoOscuro) {
     setLayout(new BorderLayout());
 
     // Panel de formulario
@@ -145,10 +143,10 @@ public class VentanaVehiculos extends JPanel {
     add(scrollPane, BorderLayout.CENTER);
     add(lblEstado, BorderLayout.SOUTH);
 
-    aplicarEstilos();
+    aplicarEstilos(modoOscuro);
   }
 
-  private void aplicarEstilos() {
+  private void aplicarEstilos(boolean modoOscuro) {
     Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
     Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
 
@@ -265,7 +263,6 @@ public class VentanaVehiculos extends JPanel {
   }
 
   public void setModoOscuro(boolean modoOscuro) {
-    this.modoOscuro = modoOscuro;
-    aplicarEstilos();
+    aplicarEstilos(modoOscuro);
   }
 }

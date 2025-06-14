@@ -224,6 +224,7 @@ public class VentanaEmpleados extends JPanel {
         c.setBackground(fondo);
         for (Component child : ((JPanel) c).getComponents()) {
           child.setBackground(fondo);
+
         }
       }
     }
@@ -238,6 +239,7 @@ public class VentanaEmpleados extends JPanel {
       tablaEmpleados.setForeground(texto);
       tablaEmpleados.getTableHeader().setBackground(fondo);
       tablaEmpleados.getTableHeader().setForeground(texto);
+
     }
     if (lblEstado != null)
       lblEstado.setForeground(texto);

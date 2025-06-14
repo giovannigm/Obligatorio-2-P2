@@ -14,7 +14,6 @@ public class VentanaClientes extends JPanel {
   private DefaultTableModel modelo;
   private JLabel lblEstado;
   private DatosSistema datos;
-  private boolean modoOscuro;
   private JLabel lblNombre;
   private JLabel lblCedula;
   private JLabel lblDireccion;
@@ -22,13 +21,12 @@ public class VentanaClientes extends JPanel {
   private JLabel lblAnioAlta;
 
   public VentanaClientes(boolean modoOscuro) {
-    this.modoOscuro = modoOscuro;
     this.datos = DatosSistema.getInstancia();
-    initComponents();
+    initComponents(modoOscuro);
     actualizarTabla();
   }
 
-  private void initComponents() {
+  private void initComponents(boolean modoOscuro) {
     setLayout(new BorderLayout());
 
     // Filtro para solo 4 números (Año Alta)
@@ -182,10 +180,10 @@ public class VentanaClientes extends JPanel {
     add(scrollPane, BorderLayout.CENTER);
     add(lblEstado, BorderLayout.SOUTH);
 
-    aplicarEstilos();
+    aplicarEstilos(modoOscuro);
   }
 
-  private void aplicarEstilos() {
+  private void aplicarEstilos(boolean modoOscuro) {
     Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
     Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
 
@@ -308,7 +306,6 @@ public class VentanaClientes extends JPanel {
   }
 
   public void setModoOscuro(boolean modoOscuro) {
-    this.modoOscuro = modoOscuro;
-    aplicarEstilos();
+    aplicarEstilos(modoOscuro);
   }
 }
