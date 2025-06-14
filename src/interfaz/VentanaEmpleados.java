@@ -13,16 +13,16 @@ public class VentanaEmpleados extends JPanel implements ModoOscuroObserver {
   private JScrollPane scrollTabla;
   private JLabel lblEstado;
   private ControladorSistema controlador;
-  private boolean modoOscuro;
   private JLabel lblNombre;
   private JLabel lblCedula;
   private JLabel lblDireccion;
+  private boolean modoOscuro;
 
   public VentanaEmpleados(boolean modoOscuro, ControladorSistema controlador) {
     this.modoOscuro = modoOscuro;
     this.controlador = controlador;
     initComponents();
-    aplicarEstilos();
+    Estilos.aplicarEstilos(this, modoOscuro);
     actualizarTabla();
   }
 
@@ -210,35 +210,9 @@ public class VentanaEmpleados extends JPanel implements ModoOscuroObserver {
     lblEstado.setForeground(Color.GREEN);
   }
 
-  private void aplicarEstilos() {
-    Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
-    Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
-
-    setBackground(fondo);
-    for (Component c : getComponents()) {
-      if (c instanceof JPanel) {
-        c.setBackground(fondo);
-        for (Component child : ((JPanel) c).getComponents()) {
-          child.setBackground(fondo);
-        }
-      }
-    }
-
-    // Seteamos explícitamente el color de los labels del formulario
-    lblNombre.setForeground(texto);
-    lblCedula.setForeground(texto);
-    lblDireccion.setForeground(texto);
-
-    tablaEmpleados.setBackground(fondo);
-    tablaEmpleados.setForeground(texto);
-    tablaEmpleados.getTableHeader().setBackground(fondo);
-    tablaEmpleados.getTableHeader().setForeground(texto);
-    lblEstado.setForeground(texto);
-  }
-
   public void setModoOscuro(boolean modoOscuro) {
     this.modoOscuro = modoOscuro;
-    aplicarEstilos();
+    Estilos.aplicarEstilos(this, modoOscuro);
   }
 
   @Override

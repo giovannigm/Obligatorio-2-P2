@@ -182,34 +182,7 @@ public class VentanaClientes extends JPanel implements ModoOscuroObserver {
     add(scrollPane, BorderLayout.CENTER);
     add(lblEstado, BorderLayout.SOUTH);
 
-    aplicarEstilos();
-  }
-
-  private void aplicarEstilos() {
-    Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
-    Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
-
-    setBackground(fondo);
-    for (Component c : getComponents()) {
-      if (c instanceof JPanel) {
-        c.setBackground(fondo);
-        for (Component child : ((JPanel) c).getComponents()) {
-          child.setBackground(fondo);
-        }
-      }
-    }
-    // Seteamos explícitamente el color de los labels del formulario
-    lblNombre.setForeground(texto);
-    lblCedula.setForeground(texto);
-    lblDireccion.setForeground(texto);
-    lblCelular.setForeground(texto);
-    lblAnioAlta.setForeground(texto);
-
-    tablaClientes.setBackground(fondo);
-    tablaClientes.setForeground(texto);
-    tablaClientes.getTableHeader().setBackground(fondo);
-    tablaClientes.getTableHeader().setForeground(texto);
-    lblEstado.setForeground(texto);
+    Estilos.aplicarEstilos(this, modoOscuro);
   }
 
   private void actualizarTabla() {
@@ -302,7 +275,7 @@ public class VentanaClientes extends JPanel implements ModoOscuroObserver {
 
   public void setModoOscuro(boolean modoOscuro) {
     this.modoOscuro = modoOscuro;
-    aplicarEstilos();
+    Estilos.aplicarEstilos(this, modoOscuro);
   }
 
   @Override

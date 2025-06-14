@@ -111,7 +111,7 @@ public class VentanaContratos extends JPanel implements ModoOscuroObserver {
     add(scrollPane, BorderLayout.CENTER);
     add(lblEstado, BorderLayout.SOUTH);
 
-    aplicarEstilos();
+    Estilos.aplicarEstilos(this, modoOscuro);
   }
 
   public void actualizarCombos() {
@@ -202,36 +202,9 @@ public class VentanaContratos extends JPanel implements ModoOscuroObserver {
     lblEstado.setForeground(Color.GREEN);
   }
 
-  private void aplicarEstilos() {
-    Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
-    Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
-
-    setBackground(fondo);
-    for (Component c : getComponents()) {
-      if (c instanceof JPanel) {
-        c.setBackground(fondo);
-        for (Component child : ((JPanel) c).getComponents()) {
-          child.setBackground(fondo);
-        }
-      }
-    }
-
-    tablaContratos.setBackground(fondo);
-    tablaContratos.setForeground(texto);
-    tablaContratos.getTableHeader().setBackground(fondo);
-    tablaContratos.getTableHeader().setForeground(texto);
-    lblEstado.setForeground(texto);
-    cmbClientes.setBackground(fondo);
-    cmbClientes.setForeground(texto);
-    cmbVehiculos.setBackground(fondo);
-    cmbVehiculos.setForeground(texto);
-    cmbEmpleados.setBackground(fondo);
-    cmbEmpleados.setForeground(texto);
-  }
-
   public void setModoOscuro(boolean modoOscuro) {
     this.modoOscuro = modoOscuro;
-    aplicarEstilos();
+    Estilos.aplicarEstilos(this, modoOscuro);
   }
 
   @Override

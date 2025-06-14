@@ -35,7 +35,7 @@ public class VentanaPrincipal extends JFrame {
         crearMenu();
         crearContenido();
 
-        aplicarModo();
+        Estilos.aplicarEstilos(panelPrincipal, modoOscuro);
         setVisible(true);
     }
 
@@ -226,7 +226,7 @@ public class VentanaPrincipal extends JFrame {
         btnModo.setPreferredSize(new Dimension(180, 40)); // Tamaño mediano
         btnModo.addActionListener(e -> {
             modoOscuro = !modoOscuro;
-            aplicarModo();
+            Estilos.aplicarEstilos(panelPrincipal, modoOscuro);
             notificarObservadores();
         });
 
@@ -237,53 +237,6 @@ public class VentanaPrincipal extends JFrame {
         panelPrincipal.add(btnModo, gbc);
         add(panelPrincipal, BorderLayout.CENTER);
     }
-
-    private void aplicarModo() {
-        Color fondo, texto, fondoMenu;
-
-        if (modoOscuro) {
-            fondo = Color.BLACK;
-            texto = Color.WHITE;
-            fondoMenu = new Color(30, 30, 30);
-        } else {
-            fondo = Color.WHITE;
-            texto = Color.BLACK;
-            fondoMenu = new Color(240, 240, 240);
-        }
-
-        // Fondo y botón
-        panelPrincipal.setBackground(fondo);
-        btnModo.setBackground(fondoMenu);
-        btnModo.setForeground(texto);
-
-        // Menú principal
-        menuBar.setBackground(fondoMenu);
-        menuBar.setOpaque(true);
-
-        for (int i = 0; i < menuBar.getMenuCount(); i++) {
-            JMenu menu = menuBar.getMenu(i);
-            if (menu != null) {
-                menu.setBackground(fondoMenu);
-                menu.setForeground(texto);
-                menu.setOpaque(true);
-
-                for (int j = 0; j < menu.getItemCount(); j++) {
-                    JMenuItem item = menu.getItem(j);
-                    if (item != null) {
-                        item.setBackground(fondoMenu); // Ahora respeta el modo
-                        item.setForeground(texto);
-                        item.setOpaque(true);
-                    }
-                }
-            }
-        }
-    }
-
-    // --- MODO CLARO/OSCURO EN TODAS LAS VENTANAS ---
-    //
-    // Ahora el cambio de modo se realiza únicamente notificando a los observadores
-    // registrados. Se eliminó el recorrido manual de ventanas secundarias.
-    // --- FIN EXPLICACIÓN ---
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(VentanaPrincipal::new);

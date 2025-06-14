@@ -16,7 +16,6 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
   private DefaultTableModel modelo;
   private JLabel lblEstado;
   private ControladorSistema controlador;
-  private boolean modoOscuro;
 
   // Labels para estilos
   private JLabel lblTipoServicio;
@@ -27,12 +26,11 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
   private JLabel lblCosto;
 
   public VentanaServiciosAdicionales(boolean modoOscuro, ControladorSistema controlador) {
-    this.modoOscuro = modoOscuro;
     this.controlador = controlador;
     initComponents();
     actualizarTabla();
     actualizarCombos();
-    aplicarEstilos();
+    Estilos.aplicarEstilos(this, modoOscuro);
   }
 
   private void initComponents() {
@@ -329,44 +327,8 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     lblEstado.setForeground(Color.GREEN);
   }
 
-  private void aplicarEstilos() {
-    Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
-    Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
-
-    setBackground(fondo);
-    for (Component c : getComponents()) {
-      if (c instanceof JPanel) {
-        c.setBackground(fondo);
-        for (Component child : ((JPanel) c).getComponents()) {
-          child.setBackground(fondo);
-        }
-      }
-    }
-
-    // Seteamos explícitamente el color de los labels del formulario
-    lblTipoServicio.setForeground(texto);
-    lblFecha.setForeground(texto);
-    lblHora.setForeground(texto);
-    lblVehiculo.setForeground(texto);
-    lblEmpleado.setForeground(texto);
-    lblCosto.setForeground(texto);
-
-    tablaServicios.setBackground(fondo);
-    tablaServicios.setForeground(texto);
-    tablaServicios.getTableHeader().setBackground(fondo);
-    tablaServicios.getTableHeader().setForeground(texto);
-    lblEstado.setForeground(texto);
-    cmbTipoServicio.setBackground(fondo);
-    cmbTipoServicio.setForeground(texto);
-    cmbVehiculos.setBackground(fondo);
-    cmbVehiculos.setForeground(texto);
-    cmbEmpleados.setBackground(fondo);
-    cmbEmpleados.setForeground(texto);
-  }
-
   public void setModoOscuro(boolean modoOscuro) {
-    this.modoOscuro = modoOscuro;
-    aplicarEstilos();
+    Estilos.aplicarEstilos(this, modoOscuro);
   }
 
   // Método público para refrescar datos
