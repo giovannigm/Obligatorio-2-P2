@@ -4,7 +4,7 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class VentanaVehiculos extends JPanel {
+public class VentanaVehiculos extends JPanel implements ModoOscuroObserver {
   private JTextField txtMatricula;
   private JTextField txtMarca;
   private JTextField txtModelo;
@@ -145,35 +145,7 @@ public class VentanaVehiculos extends JPanel {
     add(scrollPane, BorderLayout.CENTER);
     add(lblEstado, BorderLayout.SOUTH);
 
-    aplicarEstilos();
-  }
-
-  private void aplicarEstilos() {
-    Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
-    Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
-
-    setBackground(fondo);
-    for (Component c : getComponents()) {
-      if (c instanceof JPanel) {
-        c.setBackground(fondo);
-        for (Component child : ((JPanel) c).getComponents()) {
-          child.setBackground(fondo);
-        }
-      }
-    }
-    // Seteamos explícitamente el color de los labels del formulario
-    lblMatricula.setForeground(texto);
-    lblMarca.setForeground(texto);
-    lblModelo.setForeground(texto);
-    lblEstadoVehiculo.setForeground(texto);
-
-    tablaVehiculos.setBackground(fondo);
-    tablaVehiculos.setForeground(texto);
-    tablaVehiculos.getTableHeader().setBackground(fondo);
-    tablaVehiculos.getTableHeader().setForeground(texto);
-    lblEstado.setForeground(texto);
-    cmbEstado.setBackground(fondo);
-    cmbEstado.setForeground(texto);
+    Estilos.aplicarEstilos(this, modoOscuro);
   }
 
   private void actualizarTabla() {
@@ -278,6 +250,11 @@ public class VentanaVehiculos extends JPanel {
 
   public void setModoOscuro(boolean modoOscuro) {
     this.modoOscuro = modoOscuro;
-    aplicarEstilos();
+    Estilos.aplicarEstilos(this, modoOscuro);
+  }
+
+  @Override
+  public void actualizarModoOscuro(boolean modoOscuro) {
+    setModoOscuro(modoOscuro);
   }
 }
