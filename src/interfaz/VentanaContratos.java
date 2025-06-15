@@ -228,4 +228,9 @@ public class VentanaContratos extends JPanel {
     this.modoOscuro = modoOscuro;
     aplicarEstilos();
   }
+
+  public void actualizarControlador(ControladorSistema nuevoControlador) {
+    this.controlador = nuevoControlador;
+    refrescarDatos();
+  }
 }

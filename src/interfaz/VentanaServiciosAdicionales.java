@@ -370,4 +370,9 @@ public class VentanaServiciosAdicionales extends JPanel {
     actualizarCombos();
     actualizarTabla();
   }
+
+  public void actualizarControlador(ControladorSistema nuevoControlador) {
+    this.controlador = nuevoControlador;
+    refrescarDatos();
+  }
 }

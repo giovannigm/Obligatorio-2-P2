@@ -1,8 +1,15 @@
 import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.io.Serializable;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.IOException;
 
-public class ControladorSistema {
+public class ControladorSistema implements Serializable {
   private ArrayList<ClienteMensual> clientes;
   private ArrayList<Vehiculo> vehiculos;
   private ArrayList<Empleado> empleados;
@@ -450,5 +457,75 @@ public class ControladorSistema {
 
   public ArrayList<Salida> getSalidas() {
     return new ArrayList<>(salidas);
+  }
+
+  // ========== MÉTODOS DE PERSISTENCIA DE DATOS ==========
+
+  /**
+   * Guarda los datos del sistema en un archivo serializado
+   * 
+   * @param controlador La instancia del controlador a guardar
+   * @throws IOException si ocurre un error al guardar los datos
+   */
+  public static void guardarDatos(ControladorSistema controlador) throws IOException {
+    File archivo = new File("DATOS.ser");
+
+    try (FileOutputStream fileOut = new FileOutputStream(archivo);
+        ObjectOutputStream objectOut = new ObjectOutputStream(fileOut)) {
+
+      // Guardar la instancia del controlador
+      objectOut.writeObject(controlador);
+
+      System.out.println("Datos guardados exitosamente en: " + archivo.getAbsolutePath());
+
+    } catch (IOException e) {
+      System.err.println("Error al guardar los datos: " + e.getMessage());
+      e.printStackTrace();
+      throw e;
+    }
+  }
+
+  /**
+   * Recupera los datos del sistema desde un archivo serializado
+   * 
+   * @return La instancia del controlador recuperada, o una nueva instancia si no
+   *         existe el archivo
+   * @throws IOException            si ocurre un error al leer el archivo
+   * @throws ClassNotFoundException si hay problemas de compatibilidad de clases
+   */
+  public static ControladorSistema recuperarDatos() throws IOException, ClassNotFoundException {
+    File archivo = new File("DATOS.ser");
+
+    // Verificar si el archivo existe
+    if (!archivo.exists()) {
+      System.out.println("No se encontró el archivo DATOS.ser. Se creará una nueva instancia vacía.");
+      return new ControladorSistema();
+    }
+
+    try (FileInputStream fileIn = new FileInputStream(archivo);
+        ObjectInputStream objectIn = new ObjectInputStream(fileIn)) {
+
+      // Leer la instancia del controlador
+      ControladorSistema controladorRecuperado = (ControladorSistema) objectIn.readObject();
+
+      // Verificar que la instancia no sea null
+      if (controladorRecuperado == null) {
+        throw new IOException("El archivo contiene datos nulos");
+      }
+
+      System.out.println("Datos recuperados exitosamente desde: " + archivo.getAbsolutePath());
+
+      return controladorRecuperado;
+
+    } catch (IOException e) {
+      System.err.println("Error al leer el archivo: " + e.getMessage());
+      e.printStackTrace();
+      throw e;
+
+    } catch (ClassNotFoundException e) {
+      System.err.println("Error de compatibilidad de clases: " + e.getMessage());
+      e.printStackTrace();
+      throw e;
+    }
   }
 }

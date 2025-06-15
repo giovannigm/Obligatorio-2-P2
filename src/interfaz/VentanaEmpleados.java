@@ -240,4 +240,9 @@ public class VentanaEmpleados extends JPanel {
     this.modoOscuro = modoOscuro;
     aplicarEstilos();
   }
+
+  public void actualizarControlador(ControladorSistema nuevoControlador) {
+    this.controlador = nuevoControlador;
+    actualizarTabla();
+  }
 }

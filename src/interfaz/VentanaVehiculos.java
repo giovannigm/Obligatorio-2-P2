@@ -280,4 +280,9 @@ public class VentanaVehiculos extends JPanel {
     this.modoOscuro = modoOscuro;
     aplicarEstilos();
   }
+
+  public void actualizarControlador(ControladorSistema nuevoControlador) {
+    this.controlador = nuevoControlador;
+    actualizarTabla();
+  }
 }

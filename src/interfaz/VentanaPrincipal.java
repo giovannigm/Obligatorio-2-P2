@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.IOException;
 
 public class VentanaPrincipal extends JFrame {
     private boolean modoOscuro = false;
@@ -17,7 +18,7 @@ public class VentanaPrincipal extends JFrame {
     private JButton btnModo;
     private JMenu menuGestion, menuMov, menuVarios, menuTerminar;
     private JMenuItem itemGestionVehiculos, itemGestionClientes, itemGestionEmpleados, itemGestionContratos,
-            itemMiniJuego, itemServiciosAdicionales;
+            itemMiniJuego, itemServiciosAdicionales, itemGrabarDatos, itemRecuperarDatos;
     private List<JFrame> ventanasSecundarias = new ArrayList<>();
     private ControladorSistema controlador;
 
@@ -71,8 +72,10 @@ public class VentanaPrincipal extends JFrame {
         // Menú Varios
         menuVarios = new JMenu("Varios");
         menuVarios.add(new JMenuItem("Reportes"));
-        menuVarios.add(new JMenuItem("Recuperación de datos"));
-        menuVarios.add(new JMenuItem("Grabación de datos"));
+        itemRecuperarDatos = new JMenuItem("Recuperación de datos");
+        menuVarios.add(itemRecuperarDatos);
+        itemGrabarDatos = new JMenuItem("Grabación de datos");
+        menuVarios.add(itemGrabarDatos);
         itemMiniJuego = new JMenuItem("MiniJuego");
         menuVarios.add(itemMiniJuego);
         menuVarios.add(new JMenuItem("Información de Autores"));
@@ -182,6 +185,86 @@ public class VentanaPrincipal extends JFrame {
         itemMiniJuego.addActionListener(e -> {
             VentanaMiniJuego frameMiniJuego = new VentanaMiniJuego();
             frameMiniJuego.setVisible(true);
+        });
+
+        // Listener para grabar datos del sistema
+        itemGrabarDatos.addActionListener(e -> {
+            int confirmacion = JOptionPane.showConfirmDialog(
+                    this,
+                    "¿Está seguro que desea grabar los datos del sistema?",
+                    "Confirmar grabación",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (confirmacion == JOptionPane.YES_OPTION) {
+                try {
+                    ControladorSistema.guardarDatos(controlador);
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Los datos han sido guardados exitosamente.",
+                            "Grabación exitosa",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Error al guardar los datos: " + ex.getMessage(),
+                            "Error de grabación",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        // Listener para recuperar datos del sistema
+        itemRecuperarDatos.addActionListener(e -> {
+            int confirmacion = JOptionPane.showConfirmDialog(
+                    this,
+                    "¿Está seguro que desea recuperar los datos del sistema?",
+                    "Confirmar recuperación",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (confirmacion == JOptionPane.YES_OPTION) {
+                try {
+                    ControladorSistema controladorRecuperado = ControladorSistema.recuperarDatos();
+
+                    // Reemplazar la instancia actual del controlador
+                    this.controlador = controladorRecuperado;
+
+                    // Actualizar todas las ventanas secundarias abiertas con el nuevo controlador
+                    for (JFrame ventana : ventanasSecundarias) {
+                        Component panel = ventana.getContentPane().getComponent(0);
+                        if (panel instanceof VentanaClientes) {
+                            ((VentanaClientes) panel).actualizarControlador(controlador);
+                        } else if (panel instanceof VentanaVehiculos) {
+                            ((VentanaVehiculos) panel).actualizarControlador(controlador);
+                        } else if (panel instanceof VentanaEmpleados) {
+                            ((VentanaEmpleados) panel).actualizarControlador(controlador);
+                        } else if (panel instanceof VentanaContratos) {
+                            ((VentanaContratos) panel).actualizarControlador(controlador);
+                        } else if (panel instanceof VentanaServiciosAdicionales) {
+                            ((VentanaServiciosAdicionales) panel).actualizarControlador(controlador);
+                        }
+                    }
+
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Los datos han sido recuperados exitosamente.",
+                            "Recuperación exitosa",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Error al leer el archivo: " + ex.getMessage(),
+                            "Error de recuperación",
+                            JOptionPane.ERROR_MESSAGE);
+                } catch (ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Error de compatibilidad de clases. El archivo puede estar corrupto o ser incompatible.",
+                            "Error de compatibilidad",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
         });
 
         // Listener para salir con confirmación
