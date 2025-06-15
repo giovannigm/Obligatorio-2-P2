@@ -211,4 +211,9 @@ public class VentanaContratos extends JPanel implements ModoOscuroObserver {
   public void actualizarModoOscuro(boolean modoOscuro) {
     setModoOscuro(modoOscuro);
   }
+
+  public void actualizarControlador(ControladorSistema nuevoControlador) {
+    this.controlador = nuevoControlador;
+    refrescarDatos();
+  }
 }

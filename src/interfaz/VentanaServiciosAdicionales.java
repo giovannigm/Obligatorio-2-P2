@@ -337,7 +337,11 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     actualizarTabla();
   }
 
-  @Override
+  public void actualizarControlador(ControladorSistema nuevoControlador) {
+    this.controlador = nuevoControlador;
+    refrescarDatos();
+
+@Override
   public void actualizarModoOscuro(boolean modoOscuro) {
     setModoOscuro(modoOscuro);
   }
