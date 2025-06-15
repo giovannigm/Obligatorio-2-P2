@@ -5,7 +5,7 @@ import java.awt.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-public class VentanaServiciosAdicionales extends JPanel {
+public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObserver {
   private JComboBox<String> cmbTipoServicio;
   private JTextField txtFecha;
   private JTextField txtHora;
@@ -16,7 +16,6 @@ public class VentanaServiciosAdicionales extends JPanel {
   private DefaultTableModel modelo;
   private JLabel lblEstado;
   private ControladorSistema controlador;
-  private boolean modoOscuro;
 
   // Labels para estilos
   private JLabel lblTipoServicio;
@@ -27,12 +26,11 @@ public class VentanaServiciosAdicionales extends JPanel {
   private JLabel lblCosto;
 
   public VentanaServiciosAdicionales(boolean modoOscuro, ControladorSistema controlador) {
-    this.modoOscuro = modoOscuro;
     this.controlador = controlador;
     initComponents();
     actualizarTabla();
     actualizarCombos();
-    aplicarEstilos();
+    Estilos.aplicarEstilos(this, modoOscuro);
   }
 
   private void initComponents() {
@@ -196,7 +194,11 @@ public class VentanaServiciosAdicionales extends JPanel {
     };
     tablaServicios = new JTable(modelo);
     tablaServicios.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    tablaServicios.setOpaque(false);
+    tablaServicios.getTableHeader().setOpaque(false);
     JScrollPane scrollPane = new JScrollPane(tablaServicios);
+    scrollPane.setOpaque(false);
+    scrollPane.getViewport().setOpaque(false);
 
     // Listener para selección en la tabla
     tablaServicios.getSelectionModel().addListSelectionListener(e -> {
@@ -325,44 +327,8 @@ public class VentanaServiciosAdicionales extends JPanel {
     lblEstado.setForeground(Color.GREEN);
   }
 
-  private void aplicarEstilos() {
-    Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
-    Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
-
-    setBackground(fondo);
-    for (Component c : getComponents()) {
-      if (c instanceof JPanel) {
-        c.setBackground(fondo);
-        for (Component child : ((JPanel) c).getComponents()) {
-          child.setBackground(fondo);
-        }
-      }
-    }
-
-    // Seteamos explícitamente el color de los labels del formulario
-    lblTipoServicio.setForeground(texto);
-    lblFecha.setForeground(texto);
-    lblHora.setForeground(texto);
-    lblVehiculo.setForeground(texto);
-    lblEmpleado.setForeground(texto);
-    lblCosto.setForeground(texto);
-
-    tablaServicios.setBackground(fondo);
-    tablaServicios.setForeground(texto);
-    tablaServicios.getTableHeader().setBackground(fondo);
-    tablaServicios.getTableHeader().setForeground(texto);
-    lblEstado.setForeground(texto);
-    cmbTipoServicio.setBackground(fondo);
-    cmbTipoServicio.setForeground(texto);
-    cmbVehiculos.setBackground(fondo);
-    cmbVehiculos.setForeground(texto);
-    cmbEmpleados.setBackground(fondo);
-    cmbEmpleados.setForeground(texto);
-  }
-
   public void setModoOscuro(boolean modoOscuro) {
-    this.modoOscuro = modoOscuro;
-    aplicarEstilos();
+    Estilos.aplicarEstilos(this, modoOscuro);
   }
 
   // Método público para refrescar datos
@@ -374,5 +340,9 @@ public class VentanaServiciosAdicionales extends JPanel {
   public void actualizarControlador(ControladorSistema nuevoControlador) {
     this.controlador = nuevoControlador;
     refrescarDatos();
+
+@Override
+  public void actualizarModoOscuro(boolean modoOscuro) {
+    setModoOscuro(modoOscuro);
   }
 }

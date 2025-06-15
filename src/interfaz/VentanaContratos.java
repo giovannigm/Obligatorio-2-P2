@@ -3,7 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class VentanaContratos extends JPanel {
+public class VentanaContratos extends JPanel implements ModoOscuroObserver {
   private JComboBox<ClienteMensual> cmbClientes;
   private JComboBox<Vehiculo> cmbVehiculos;
   private JComboBox<Empleado> cmbEmpleados;
@@ -85,7 +85,12 @@ public class VentanaContratos extends JPanel {
       }
     };
     tablaContratos = new JTable(modelo);
+    tablaContratos.setOpaque(false);
+    tablaContratos.getTableHeader().setOpaque(false);
     JScrollPane scrollPane = new JScrollPane(tablaContratos);
+    scrollPane.setOpaque(false);
+    scrollPane.getViewport().setOpaque(false);
+
 
     // Listener para selección en la tabla
     tablaContratos.getSelectionModel().addListSelectionListener(e -> {
@@ -106,7 +111,7 @@ public class VentanaContratos extends JPanel {
     add(scrollPane, BorderLayout.CENTER);
     add(lblEstado, BorderLayout.SOUTH);
 
-    aplicarEstilos();
+    Estilos.aplicarEstilos(this, modoOscuro);
   }
 
   public void actualizarCombos() {
@@ -197,36 +202,14 @@ public class VentanaContratos extends JPanel {
     lblEstado.setForeground(Color.GREEN);
   }
 
-  private void aplicarEstilos() {
-    Color fondo = modoOscuro ? Color.BLACK : Color.WHITE;
-    Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
-
-    setBackground(fondo);
-    for (Component c : getComponents()) {
-      if (c instanceof JPanel) {
-        c.setBackground(fondo);
-        for (Component child : ((JPanel) c).getComponents()) {
-          child.setBackground(fondo);
-        }
-      }
-    }
-
-    tablaContratos.setBackground(fondo);
-    tablaContratos.setForeground(texto);
-    tablaContratos.getTableHeader().setBackground(fondo);
-    tablaContratos.getTableHeader().setForeground(texto);
-    lblEstado.setForeground(texto);
-    cmbClientes.setBackground(fondo);
-    cmbClientes.setForeground(texto);
-    cmbVehiculos.setBackground(fondo);
-    cmbVehiculos.setForeground(texto);
-    cmbEmpleados.setBackground(fondo);
-    cmbEmpleados.setForeground(texto);
-  }
-
   public void setModoOscuro(boolean modoOscuro) {
     this.modoOscuro = modoOscuro;
-    aplicarEstilos();
+    Estilos.aplicarEstilos(this, modoOscuro);
+  }
+
+  @Override
+  public void actualizarModoOscuro(boolean modoOscuro) {
+    setModoOscuro(modoOscuro);
   }
 
   public void actualizarControlador(ControladorSistema nuevoControlador) {
