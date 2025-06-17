@@ -1,0 +1,10 @@
+HISTORIAL DE MOVIMIENTOS - VEHÍCULO: DEF9012
+Fecha de exportación: 17/06/2025 00:28
+================================================================================
+
+TIPO            FECHA        HORA     EMPLEADO             DETALLES                       COSTO/DURACIÓN 
+================================================================================
+Servicio Adicional 12/09/2003   12:12    Miguel Torres        limpieza de tapizado           $12122.00      
+Entrada         17/06/2025   00:27    Roberto Silva        1212                           Sin contrato   
+
+Total de movimientos: 2
