@@ -6,6 +6,9 @@ public class Vehiculo implements Serializable {
   private String modelo;
   private String estado;
 
+  // Indica si el vehículo está dentro del parking
+  private boolean dentroParking = false;
+
   // Constructor
   public Vehiculo(String matricula, String marca, String modelo, String estado) {
     this.matricula = matricula;
@@ -51,6 +54,14 @@ public class Vehiculo implements Serializable {
     this.estado = estado;
   }
 
+  public boolean isDentroParking() {
+    return dentroParking;
+  }
+
+  public void setDentroParking(boolean dentro) {
+    this.dentroParking = dentro;
+  }
+
   // Método para comparar por matrícula
   public boolean esIgual(String matricula) {
     return this.matricula.equals(matricula);
@@ -59,5 +70,13 @@ public class Vehiculo implements Serializable {
   @Override
   public String toString() {
     return marca + " " + modelo + " (" + matricula + ")";
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Vehiculo v) {
+      return esIgual(v.getMatricula());
+    }
+    return false;
   }
 }

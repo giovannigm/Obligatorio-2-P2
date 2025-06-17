@@ -70,4 +70,12 @@ public class ClienteMensual implements Serializable {
   public String toString() {
     return nombre + " - " + cedula;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof ClienteMensual c) {
+      return cedula != null && esIgual(c.getCedula());
+    }
+    return false;
+  }
 }

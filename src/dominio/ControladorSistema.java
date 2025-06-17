@@ -528,4 +528,40 @@ public class ControladorSistema implements Serializable {
       throw e;
     }
   }
+  // ========== MÉTODOS DE ENTRADAS ==========
+
+  // Devuelve una lista de vehículos que NO están actualmente dentro del parking
+  public ArrayList<Vehiculo> getVehiculosFueraParking() {
+    ArrayList<Vehiculo> fuera = new ArrayList<>();
+    for (Vehiculo v : vehiculos) {
+      if (!v.isDentroParking()) {
+        fuera.add(v);
+      }
+    }
+    return fuera;
+  }
+
+  // Devuelve true si el vehículo tiene contrato vigente
+  public boolean tieneContrato(Vehiculo v) {
+    for (Contrato c : contratos) {
+      if (c.getVehiculo().equals(v)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Registra la entrada de un vehículo
+  public void registrarEntrada(Vehiculo vehiculo, String fecha, String hora, String notas, Empleado empleado) {
+    if (vehiculo.isDentroParking()) {
+      throw new IllegalArgumentException("El vehículo ya está dentro del parking.");
+    }
+    // Parsear fecha y hora
+    LocalDate fechaEntrada = LocalDate.parse(fecha); // formato YYYY-MM-DD
+    LocalTime horaEntrada = LocalTime.parse(hora); // formato HH:MM
+    boolean tieneContrato = tieneContrato(vehiculo);
+    Entrada entrada = new Entrada(vehiculo, fechaEntrada, horaEntrada, notas, empleado, tieneContrato);
+    vehiculo.setDentroParking(true);
+    entradas.add(entrada);
+  }
 }

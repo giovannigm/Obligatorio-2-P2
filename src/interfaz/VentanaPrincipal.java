@@ -73,7 +73,8 @@ public class VentanaPrincipal extends JFrame {
 
         // Menú Movimientos
         menuMov = new JMenu("Movimientos");
-        menuMov.add(new JMenuItem("Entradas"));
+        JMenuItem itemEntradas = new JMenuItem("Entradas");
+        menuMov.add(itemEntradas);
         menuMov.add(new JMenuItem("Salidas"));
         itemServiciosAdicionales = new JMenuItem("Servicios Adicionales");
         menuMov.add(itemServiciosAdicionales);
@@ -298,6 +299,26 @@ public class VentanaPrincipal extends JFrame {
             if (confirm == JOptionPane.YES_OPTION) {
                 System.exit(0);
             }
+        });
+
+        // Listener para abrir VentanaEntrada en una ventana aparte
+        itemEntradas.addActionListener(e -> {
+            JFrame frameEntrada = new JFrame("Registrar Entrada");
+            frameEntrada.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frameEntrada.setSize(500, 400);
+            frameEntrada.setLocationRelativeTo(this);
+            frameEntrada.setLayout(new BorderLayout());
+            VentanaEntrada panel = new VentanaEntrada(modoOscuro, controlador);
+            agregarObservador(panel);
+            frameEntrada.add(panel, BorderLayout.CENTER);
+            frameEntrada.setVisible(true);
+            ventanasSecundarias.add(frameEntrada);
+            frameEntrada.addWindowListener(new java.awt.event.WindowAdapter() {
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    eliminarObservador(panel);
+                    ventanasSecundarias.remove(frameEntrada);
+                }
+            });
         });
     }
 
