@@ -76,9 +76,10 @@ public class Entrada implements Serializable {
 
   @Override
   public String toString() {
-    return "Entrada{" + "vehiculo=" + vehiculo + ", fecha=" + fecha +
-        ", hora=" + hora + ", notas=" + notas +
-        ", empleadoRecibe=" + empleadoRecibe +
-        ", tieneContrato=" + tieneContrato + '}';
+    if (vehiculo != null) {
+      return vehiculo.getMatricula() + " - " + vehiculo.getModelo();
+    } else {
+      return "Sin vehículo";
+    }
   }
 }
