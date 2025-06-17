@@ -29,7 +29,8 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Entradas sin salida
-        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
         panelForm.add(new JLabel("Entrada sin salida:"), gbc);
         gbc.gridx = 1;
         comboEntradas = new JComboBox<>();
@@ -38,7 +39,8 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         panelForm.add(comboEntradas, gbc);
 
         // Empleados
-        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         panelForm.add(new JLabel("Empleado que entrega:"), gbc);
         gbc.gridx = 1;
         comboEmpleados = new JComboBox<>();
@@ -47,7 +49,8 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         panelForm.add(comboEmpleados, gbc);
 
         // Fecha
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         panelForm.add(new JLabel("Fecha (YYYY-MM-DD):"), gbc);
         gbc.gridx = 1;
         txtFecha = new JTextField(LocalDate.now().toString(), 10);
@@ -55,7 +58,8 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         panelForm.add(txtFecha, gbc);
 
         // Hora
-        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
         panelForm.add(new JLabel("Hora (HH:MM, 24hs):"), gbc);
         gbc.gridx = 1;
         txtHora = new JTextField(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")), 5);
@@ -63,7 +67,8 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         panelForm.add(txtHora, gbc);
 
         // Comentario
-        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.gridx = 0;
+        gbc.gridy = 4;
         panelForm.add(new JLabel("Comentario estado vehículo:"), gbc);
         gbc.gridx = 1;
         txtComentario = new JTextArea(3, 20);
@@ -72,7 +77,9 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         panelForm.add(scrollComentario, gbc);
 
         // Botón registrar
-        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
         btnRegistrar = new JButton("Registrar Salida");
         panelForm.add(btnRegistrar, gbc);
         gbc.gridwidth = 1;
@@ -132,7 +139,8 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         try {
             LocalDate fecha = LocalDate.parse(fechaStr);
             LocalTime hora = LocalTime.parse(horaStr);
-            if (fecha.isBefore(entrada.getFecha()) || (fecha.isEqual(entrada.getFecha()) && hora.isBefore(entrada.getHora()))) {
+            if (fecha.isBefore(entrada.getFecha())
+                    || (fecha.isEqual(entrada.getFecha()) && hora.isBefore(entrada.getHora()))) {
                 Estilos.mostrarError(lblEstado, "La salida debe ser posterior a la entrada.");
                 return;
             }
@@ -142,7 +150,8 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
             long horas = duracion.toHours();
             long minutos = duracion.toMinutes() % 60;
             String tieneContrato = entrada.isTieneContrato() ? "Sí" : "No";
-            Estilos.mostrarExito(lblEstado, "Tiempo: " + horas + "h " + minutos + "m. Contrato: " + tieneContrato);
+            Estilos.mostrarExito(lblEstado,
+                    "Tiempo: " + horas + "h " + minutos + "m. Tiene Contrato: " + tieneContrato);
             cargarEntradasSinSalida();
             txtComentario.setText("");
         } catch (Exception ex) {
