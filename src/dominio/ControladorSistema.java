@@ -544,7 +544,7 @@ public class ControladorSistema implements Serializable {
   // Devuelve true si el vehículo tiene contrato vigente
   public boolean tieneContrato(Vehiculo v) {
     for (Contrato c : contratos) {
-      if (c.getVehiculo().equals(v) && c.estaVigente()) {
+      if (c.getVehiculo().equals(v)) {
         return true;
       }
     }

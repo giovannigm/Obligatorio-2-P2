@@ -71,4 +71,12 @@ public class Vehiculo implements Serializable {
   public String toString() {
     return marca + " " + modelo + " (" + matricula + ")";
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Vehiculo v) {
+      return esIgual(v.getMatricula());
+    }
+    return false;
+  }
 }

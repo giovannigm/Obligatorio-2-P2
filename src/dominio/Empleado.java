@@ -60,4 +60,12 @@ public class Empleado implements Serializable {
   public String toString() {
     return nombre + " - " + cedula;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Empleado v) {
+      return cedula != null && v.esIgual(cedula);
+    }
+    return false;
+  }
 }

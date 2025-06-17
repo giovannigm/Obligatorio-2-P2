@@ -110,14 +110,7 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
             return;
         }
         Vehiculo v = controlador.getVehiculosFueraParking().get(idx);
-        boolean tieneContrato = false;
-        // Buscar contrato vigente para este vehículo
-        for (Contrato c : controlador.getContratos()) {
-            if (c.getVehiculo().equals(v) && c.estaVigente()) {
-                tieneContrato = true;
-                break;
-            }
-        }
+        boolean tieneContrato = controlador.tieneContrato(v);
         lblContrato.setText("Tiene contrato: " + (tieneContrato ? "Sí" : "No"));
         lblContrato.setForeground(tieneContrato ? Color.GREEN.darker() : Color.RED);
     }
