@@ -6,6 +6,9 @@ public class Vehiculo implements Serializable {
   private String modelo;
   private String estado;
 
+  // Indica si el vehículo está dentro del parking
+  private boolean dentroParking = false;
+
   // Constructor
   public Vehiculo(String matricula, String marca, String modelo, String estado) {
     this.matricula = matricula;
@@ -49,6 +52,14 @@ public class Vehiculo implements Serializable {
 
   public void setEstado(String estado) {
     this.estado = estado;
+  }
+
+  public boolean isDentroParking() {
+    return dentroParking;
+  }
+
+  public void setDentroParking(boolean dentro) {
+    this.dentroParking = dentro;
   }
 
   // Método para comparar por matrícula

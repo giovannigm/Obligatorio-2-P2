@@ -59,6 +59,12 @@ public class Contrato implements Serializable {
     this.valorMensual = valorMensual;
   }
 
+  // Un contrato está vigente si existe y el vehículo no está fuera del sistema
+  public boolean estaVigente() {
+    // Aquí podrías agregar lógica de fechas si hay vencimiento, por ahora solo existencia
+    return vehiculo != null;
+  }
+
   @Override
   public String toString() {
     return "Contrato{" + "idContrato=" + idContrato + ", cliente=" + cliente +
