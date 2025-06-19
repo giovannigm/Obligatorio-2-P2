@@ -43,4 +43,36 @@ public class Estilos {
     label.setText(mensaje);
     label.setForeground(Color.GREEN);
   }
+
+  // Estilos específicos para reportes
+  public static class EstilosReportes {
+    public static void aplicarEstilosReporte(Component comp, boolean modoOscuro) {
+      Color fondo = modoOscuro ? Color.DARK_GRAY : Color.WHITE;
+      Color texto = modoOscuro ? Color.WHITE : Color.BLACK;
+      if (comp instanceof JPanel || comp instanceof JTabbedPane) {
+        comp.setBackground(fondo);
+      }
+      if (comp instanceof JLabel || comp instanceof JButton || comp instanceof JCheckBox || comp instanceof JComboBox) {
+        comp.setForeground(texto);
+        comp.setBackground(fondo);
+      }
+      if (comp instanceof JTable) {
+        JTable table = (JTable) comp;
+        table.setBackground(fondo);
+        table.setForeground(texto);
+        table.getTableHeader().setBackground(fondo);
+        table.getTableHeader().setForeground(texto);
+      }
+      if (comp instanceof JScrollPane) {
+        comp.setBackground(fondo);
+        Component view = ((JScrollPane) comp).getViewport().getView();
+        if (view != null) aplicarEstilosReporte(view, modoOscuro);
+      }
+      if (comp instanceof Container) {
+        for (Component child : ((Container) comp).getComponents()) {
+          aplicarEstilosReporte(child, modoOscuro);
+        }
+      }
+    }
+  }
 }

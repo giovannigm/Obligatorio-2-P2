@@ -286,12 +286,13 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver {
   }
 
   private void aplicarEstilos() {
-    Estilos.aplicarEstilos(this, modoOscuro);
+    Estilos.EstilosReportes.aplicarEstilosReporte(this, modoOscuro);
+    repaint();
   }
 
   public void setModoOscuro(boolean modoOscuro) {
     this.modoOscuro = modoOscuro;
-    Estilos.aplicarEstilos(this, modoOscuro);
+    aplicarEstilos();
   }
 
   @Override
