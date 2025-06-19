@@ -19,6 +19,7 @@ public class ControladorSistema implements Serializable {
   private ArrayList<ServicioAdicional> servicios;
 
   private transient ArrayList<ReportesObserver> reportesObservers = new ArrayList<>();
+  private transient ArrayList<ContratosObserver> contratosObservers = new ArrayList<>();
 
   public ControladorSistema() {
     this.clientes = new ArrayList<>();
@@ -231,13 +232,12 @@ public class ControladorSistema implements Serializable {
     if (cliente == null) {
       throw new IllegalArgumentException("No se encontró el cliente con cédula: " + cedula);
     }
-
     // Eliminar contratos asociados al cliente
-    contratos.removeIf(contrato -> contrato.getCliente().equals(cliente));
-
+    boolean contratosEliminados = contratos.removeIf(contrato -> contrato.getCliente().equals(cliente));
     // Eliminar el cliente
     clientes.remove(cliente);
     notificarReportesObservers();
+    if (contratosEliminados) notificarContratosObservers();
   }
 
   public ClienteMensual buscarCliente(String cedula) {
@@ -358,6 +358,7 @@ public class ControladorSistema implements Serializable {
     Contrato nuevoContrato = new Contrato(cliente, vehiculo, empleado, valor);
     contratos.add(nuevoContrato);
     notificarReportesObservers();
+    notificarContratosObservers();
   }
 
   public ArrayList<Contrato> getContratos() {
@@ -568,7 +569,7 @@ public class ControladorSistema implements Serializable {
     notificarReportesObservers();
   }
 
-  // ========== MÉTODOS DE REPORTE ESTADISTICA ==========
+  // ========== MÉTODOS DE REPORTE ESTADISTICA OBSERVER ==========
 
   public void addReportesObserver(ReportesObserver observer) {
     if (!reportesObservers.contains(observer)) {
@@ -583,6 +584,24 @@ public class ControladorSistema implements Serializable {
   private void notificarReportesObservers() {
     for (ReportesObserver observer : reportesObservers) {
       observer.reportesActualizados();
+    }
+  }
+
+  // ========== MÉTODOS DE CONTRATO OBSERVER ==========
+
+  public void addContratosObserver(ContratosObserver observer) {
+    if (!contratosObservers.contains(observer)) {
+      contratosObservers.add(observer);
+    }
+  }
+
+  public void removeContratosObserver(ContratosObserver observer) {
+    contratosObservers.remove(observer);
+  }
+
+  private void notificarContratosObservers() {
+    for (ContratosObserver observer : contratosObservers) {
+      observer.contratosActualizados();
     }
   }
 }
