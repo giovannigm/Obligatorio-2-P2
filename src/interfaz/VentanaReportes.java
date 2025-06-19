@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class VentanaReportes extends JFrame implements ModoOscuroObserver {
+public class VentanaReportes extends JFrame implements ModoOscuroObserver, ReportesObserver {
   private ControladorSistema controlador;
   private JTabbedPane tabbedPane;
   private boolean modoOscuro;
@@ -26,11 +26,12 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver {
   private DefaultTableModel modeloTabla;
   private JButton btnExportar;
   private JLabel lblEstado;
+  private JPanel panelEstadisticas;
 
   public VentanaReportes(ControladorSistema controlador, boolean modoOscuro) {
     this.controlador = controlador;
     this.modoOscuro = modoOscuro;
-
+    this.controlador.addReportesObserver(this);
     configurarVentana();
     crearComponentes();
     configurarEventos();
@@ -47,20 +48,13 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver {
 
   private void crearComponentes() {
     tabbedPane = new JTabbedPane();
-
-    // Crear pestaña de Historial por Vehículo
     JPanel panelHistorial = crearPanelHistorialVehiculo();
     tabbedPane.addTab("Historial", panelHistorial);
-
-    // Crear pestaña de Movimiento (vacía por ahora)
     JPanel panelMovimiento = new JPanel();
     panelMovimiento.add(new JLabel("Panel de Movimiento (en desarrollo)"));
     tabbedPane.addTab("Movimiento", panelMovimiento);
-
-    // Crear pestaña de Estadísticas Generales
-    JPanel panelEstadisticas = crearPanelEstadisticasGenerales();
+    panelEstadisticas = crearPanelEstadisticasGenerales();
     tabbedPane.addTab("Estadísticas Generales", panelEstadisticas);
-
     add(tabbedPane);
   }
 
@@ -309,6 +303,16 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver {
     setModoOscuro(modoOscuro);
   }
 
+  @Override
+  public void reportesActualizados() {
+    SwingUtilities.invokeLater(() -> {
+      int idx = tabbedPane.indexOfTab("Estadísticas Generales");
+      if (idx != -1) {
+        tabbedPane.setComponentAt(idx, crearPanelEstadisticasGenerales());
+      }
+    });
+  }
+
   private JPanel crearPanelEstadisticasGenerales() {
     JPanel panel = new JPanel();
     panel.setLayout(new BorderLayout(10, 10));
@@ -402,6 +406,11 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver {
     }
     for (ServicioAdicional s : controlador.getServiciosAdicionales()) {
       conteo.put(s.getEmpleado(), conteo.getOrDefault(s.getEmpleado(), 0) + 1);
+    }
+    // Contar contratos como movimiento del empleado
+    for (Contrato contrato : controlador.getContratos()) {
+      Empleado empleado = contrato.getEmpleado();
+      conteo.put(empleado, conteo.getOrDefault(empleado, 0) + 1);
     }
     java.util.List<java.util.Map.Entry<Empleado, Integer>> lista = new java.util.ArrayList<>(conteo.entrySet());
     lista.sort(java.util.Map.Entry.comparingByValue());

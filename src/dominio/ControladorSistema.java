@@ -18,6 +18,8 @@ public class ControladorSistema implements Serializable {
   private ArrayList<Salida> salidas;
   private ArrayList<ServicioAdicional> servicios;
 
+  private transient ArrayList<ReportesObserver> reportesObservers = new ArrayList<>();
+
   public ControladorSistema() {
     this.clientes = new ArrayList<>();
     this.vehiculos = new ArrayList<>();
@@ -235,6 +237,7 @@ public class ControladorSistema implements Serializable {
 
     // Eliminar el cliente
     clientes.remove(cliente);
+    notificarReportesObservers();
   }
 
   public ClienteMensual buscarCliente(String cedula) {
@@ -354,6 +357,7 @@ public class ControladorSistema implements Serializable {
     double valor = Double.parseDouble(valorMensual.trim());
     Contrato nuevoContrato = new Contrato(cliente, vehiculo, empleado, valor);
     contratos.add(nuevoContrato);
+    notificarReportesObservers();
   }
 
   public ArrayList<Contrato> getContratos() {
@@ -395,6 +399,7 @@ public class ControladorSistema implements Serializable {
     ServicioAdicional nuevoServicio = new ServicioAdicional(tipo.trim(), fechaServicio, horaServicio, vehiculo,
         empleado, valorCosto);
     servicios.add(nuevoServicio);
+    notificarReportesObservers();
   }
 
   public ArrayList<ServicioAdicional> getServiciosAdicionales() {
@@ -441,14 +446,11 @@ public class ControladorSistema implements Serializable {
     }
   }
 
-  // ========== MÉTODOS PARA OTRAS ENTIDADES ==========
-
-  public void agregarEntrada(Entrada entrada) {
-    entradas.add(entrada);
-  }
+  // ========== MÉTODOS DE SALIDA ==========
 
   public void agregarSalida(Salida salida) {
     salidas.add(salida);
+    notificarReportesObservers();
   }
 
   public ArrayList<Entrada> getEntradas() {
@@ -563,5 +565,24 @@ public class ControladorSistema implements Serializable {
     Entrada entrada = new Entrada(vehiculo, fechaEntrada, horaEntrada, notas, empleado, tieneContrato);
     vehiculo.setDentroParking(true);
     entradas.add(entrada);
+    notificarReportesObservers();
+  }
+
+  // ========== MÉTODOS DE REPORTE ESTADISTICA ==========
+
+  public void addReportesObserver(ReportesObserver observer) {
+    if (!reportesObservers.contains(observer)) {
+      reportesObservers.add(observer);
+    }
+  }
+
+  public void removeReportesObserver(ReportesObserver observer) {
+    reportesObservers.remove(observer);
+  }
+
+  private void notificarReportesObservers() {
+    for (ReportesObserver observer : reportesObservers) {
+      observer.reportesActualizados();
+    }
   }
 }
