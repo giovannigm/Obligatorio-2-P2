@@ -76,9 +76,28 @@ public class Entrada implements Serializable {
 
   @Override
   public String toString() {
-    return "Entrada{" + "vehiculo=" + vehiculo + ", fecha=" + fecha +
-        ", hora=" + hora + ", notas=" + notas +
-        ", empleadoRecibe=" + empleadoRecibe +
-        ", tieneContrato=" + tieneContrato + '}';
+    if (vehiculo != null) {
+      return vehiculo.getMatricula() + " - " + vehiculo.getModelo();
+    } else {
+      return "Sin vehículo";
+    }
   }
+
+  public boolean esIgualA(Entrada otra) {
+    if (this == otra) return true;
+    if (otra == null) return false;
+    // Compara los campos relevantes para considerar dos entradas como iguales
+    return (vehiculo != null && vehiculo.equals(otra.vehiculo)) &&
+           (fecha != null && fecha.equals(otra.fecha)) &&
+           (hora != null && hora.equals(otra.hora));
+  }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Entrada otra) {
+      return this.esIgualA(otra);
+    }
+    return false;
+  }
+
 }

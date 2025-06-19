@@ -11,7 +11,7 @@ public class VentanaPrincipal extends JFrame {
     private JButton btnModo;
     private JMenu menuGestion, menuMov, menuVarios, menuTerminar;
     private JMenuItem itemGestionVehiculos, itemGestionClientes, itemGestionEmpleados, itemGestionContratos,
-            itemMiniJuego, itemServiciosAdicionales, itemGrabarDatos, itemRecuperarDatos;
+            itemMiniJuego, itemServiciosAdicionales, itemGrabarDatos, itemRecuperarDatos, itemSalidas;
     private List<JFrame> ventanasSecundarias = new ArrayList<>();
     private ControladorSistema controlador;
     private List<ModoOscuroObserver> observadores = new ArrayList<>();
@@ -75,7 +75,8 @@ public class VentanaPrincipal extends JFrame {
         menuMov = new JMenu("Movimientos");
         JMenuItem itemEntradas = new JMenuItem("Entradas");
         menuMov.add(itemEntradas);
-        menuMov.add(new JMenuItem("Salidas"));
+        itemSalidas = new JMenuItem("Salidas");
+        menuMov.add(itemSalidas);
         itemServiciosAdicionales = new JMenuItem("Servicios Adicionales");
         menuMov.add(itemServiciosAdicionales);
 
@@ -317,6 +318,26 @@ public class VentanaPrincipal extends JFrame {
                 public void windowClosed(java.awt.event.WindowEvent e) {
                     eliminarObservador(panel);
                     ventanasSecundarias.remove(frameEntrada);
+                }
+            });
+        });
+
+        // Listener para abrir VentanaSalida en una ventana aparte
+        itemSalidas.addActionListener(e -> {
+            JFrame frameSalida = new JFrame("Registrar Salida");
+            frameSalida.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frameSalida.setSize(500, 400);
+            frameSalida.setLocationRelativeTo(this);
+            frameSalida.setLayout(new BorderLayout());
+            VentanaSalida panel = new VentanaSalida(modoOscuro, controlador);
+            agregarObservador(panel);
+            frameSalida.add(panel, BorderLayout.CENTER);
+            frameSalida.setVisible(true);
+            ventanasSecundarias.add(frameSalida);
+            frameSalida.addWindowListener(new java.awt.event.WindowAdapter() {
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    eliminarObservador(panel);
+                    ventanasSecundarias.remove(frameSalida);
                 }
             });
         });
