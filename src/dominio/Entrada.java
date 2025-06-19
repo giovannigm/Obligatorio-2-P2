@@ -82,4 +82,22 @@ public class Entrada implements Serializable {
       return "Sin vehículo";
     }
   }
+
+  public boolean esIgualA(Entrada otra) {
+    if (this == otra) return true;
+    if (otra == null) return false;
+    // Compara los campos relevantes para considerar dos entradas como iguales
+    return (vehiculo != null && vehiculo.equals(otra.vehiculo)) &&
+           (fecha != null && fecha.equals(otra.fecha)) &&
+           (hora != null && hora.equals(otra.hora));
+  }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Entrada otra) {
+      return this.esIgualA(otra);
+    }
+    return false;
+  }
+
 }

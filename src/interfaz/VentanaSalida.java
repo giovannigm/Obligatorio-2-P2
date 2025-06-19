@@ -103,7 +103,8 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         for (Entrada entrada : entradas) {
             boolean tieneSalida = false;
             for (Salida salida : salidas) {
-                if (salida.getEntrada() != null && salida.getEntrada().equals(entrada)) {
+                // Verifica si la entrada ya tiene una salida registrada
+                if (salida.getEntrada().equals(entrada)) {
                     tieneSalida = true;
                     break;
                 }
