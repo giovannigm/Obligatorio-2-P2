@@ -50,7 +50,16 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver {
 
     // Crear pestaña de Historial por Vehículo
     JPanel panelHistorial = crearPanelHistorialVehiculo();
-    tabbedPane.addTab("Historial por Vehículo", panelHistorial);
+    tabbedPane.addTab("Historial", panelHistorial);
+
+    // Crear pestaña de Movimiento (vacía por ahora)
+    JPanel panelMovimiento = new JPanel();
+    panelMovimiento.add(new JLabel("Panel de Movimiento (en desarrollo)"));
+    tabbedPane.addTab("Movimiento", panelMovimiento);
+
+    // Crear pestaña de Estadísticas Generales
+    JPanel panelEstadisticas = crearPanelEstadisticasGenerales();
+    tabbedPane.addTab("Estadísticas Generales", panelEstadisticas);
 
     add(tabbedPane);
   }
@@ -298,5 +307,124 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver {
   @Override
   public void actualizarModoOscuro(boolean modoOscuro) {
     setModoOscuro(modoOscuro);
+  }
+
+  private JPanel crearPanelEstadisticasGenerales() {
+    JPanel panel = new JPanel();
+    panel.setLayout(new BorderLayout(10, 10));
+    panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15)); // Margen general
+
+    // Panel superior con tres tablas en una sola fila y margen entre ellas
+    JPanel panelFila1 = new JPanel(new GridLayout(1, 3, 20, 0)); // Espacio horizontal entre columnas
+    panelFila1.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0)); // Margen inferior
+
+    // Servicios adicionales más utilizados
+    JPanel panelServicios = new JPanel(new BorderLayout());
+    panelServicios.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10)); // Margen derecho
+    JLabel lblServicios = new JLabel("Servicios adicionales más utilizados:", SwingConstants.CENTER);
+    JTable tablaServicios = crearTablaServiciosMasUtilizados();
+    panelServicios.add(lblServicios, BorderLayout.NORTH);
+    panelServicios.add(new JScrollPane(tablaServicios), BorderLayout.CENTER);
+    panelFila1.add(panelServicios);
+
+    // Empleados con menor cantidad de movimientos
+    JPanel panelEmpleados = new JPanel(new BorderLayout());
+    panelEmpleados.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10)); // Margen a ambos lados
+    JLabel lblEmpleados = new JLabel("Empleados con menor cantidad de movimientos:", SwingConstants.CENTER);
+    JTable tablaEmpleados = crearTablaEmpleadosMenosMovimientos();
+    panelEmpleados.add(lblEmpleados, BorderLayout.NORTH);
+    panelEmpleados.add(new JScrollPane(tablaEmpleados), BorderLayout.CENTER);
+    panelFila1.add(panelEmpleados);
+
+    // Clientes con mayor cantidad de vehículos
+    JPanel panelClientes = new JPanel(new BorderLayout());
+    panelClientes.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0)); // Margen izquierdo
+    JLabel lblClientes = new JLabel("Clientes con mayor cantidad de vehículos:", SwingConstants.CENTER);
+    JTable tablaClientes = crearTablaClientesMasVehiculos();
+    panelClientes.add(lblClientes, BorderLayout.NORTH);
+    panelClientes.add(new JScrollPane(tablaClientes), BorderLayout.CENTER);
+    panelFila1.add(panelClientes);
+
+    // Panel inferior con estadías más largas
+    JPanel panelFila2 = new JPanel(new BorderLayout());
+    JLabel lblEstadias = new JLabel("Estadías más largas:", SwingConstants.CENTER);
+    JTable tablaEstadias = crearTablaEstadiasMasLargas();
+    panelFila2.add(lblEstadias, BorderLayout.NORTH);
+    panelFila2.add(new JScrollPane(tablaEstadias), BorderLayout.CENTER);
+
+    // Agregar ambos paneles al panel principal
+    panel.add(panelFila1, BorderLayout.NORTH);
+    panel.add(panelFila2, BorderLayout.CENTER);
+
+    return panel;
+  }
+
+  private JTable crearTablaServiciosMasUtilizados() {
+    java.util.Map<String, Integer> conteo = new java.util.HashMap<>();
+    for (ServicioAdicional s : controlador.getServiciosAdicionales()) {
+      conteo.put(s.getTipo(), conteo.getOrDefault(s.getTipo(), 0) + 1);
+    }
+    String[] columnas = {"Tipo de Servicio", "Cantidad"};
+    DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
+    conteo.entrySet().stream()
+      .sorted((a, b) -> b.getValue() - a.getValue())
+      .forEach(e -> modelo.addRow(new Object[]{e.getKey(), e.getValue()}));
+    return new JTable(modelo);
+  }
+
+  private JTable crearTablaEstadiasMasLargas() {
+    java.util.List<Object[]> estadias = new java.util.ArrayList<>();
+    for (Salida salida : controlador.getSalidas()) {
+      if (salida.getEntrada() != null) {
+        java.time.LocalDateTime entrada = java.time.LocalDateTime.of(salida.getEntrada().getFecha(), salida.getEntrada().getHora());
+        java.time.LocalDateTime salidaDT = java.time.LocalDateTime.of(salida.getFecha(), salida.getHora());
+        long duracion = java.time.Duration.between(entrada, salidaDT).toMinutes();
+        estadias.add(new Object[]{salida.getEntrada().getVehiculo().getMatricula(), duracion});
+      }
+    }
+    estadias.sort((a, b) -> Long.compare((long)b[1], (long)a[1]));
+    String[] columnas = {"Vehículo", "Duración (min)"};
+    DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
+    for (Object[] fila : estadias) {
+      modelo.addRow(fila);
+    }
+    return new JTable(modelo);
+  }
+
+  private JTable crearTablaEmpleadosMenosMovimientos() {
+    java.util.Map<Empleado, Integer> conteo = new java.util.HashMap<>();
+    for (Empleado e : controlador.getEmpleados()) conteo.put(e, 0);
+    for (Entrada entrada : controlador.getEntradas()) {
+      conteo.put(entrada.getEmpleadoRecibe(), conteo.getOrDefault(entrada.getEmpleadoRecibe(), 0) + 1);
+    }
+    for (Salida salida : controlador.getSalidas()) {
+      conteo.put(salida.getEmpleadoEntrega(), conteo.getOrDefault(salida.getEmpleadoEntrega(), 0) + 1);
+    }
+    for (ServicioAdicional s : controlador.getServiciosAdicionales()) {
+      conteo.put(s.getEmpleado(), conteo.getOrDefault(s.getEmpleado(), 0) + 1);
+    }
+    java.util.List<java.util.Map.Entry<Empleado, Integer>> lista = new java.util.ArrayList<>(conteo.entrySet());
+    lista.sort(java.util.Map.Entry.comparingByValue());
+    String[] columnas = {"Empleado", "Movimientos"};
+    DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
+    for (var e : lista) {
+      modelo.addRow(new Object[]{e.getKey().getNombre(), e.getValue()});
+    }
+    return new JTable(modelo);
+  }
+
+  private JTable crearTablaClientesMasVehiculos() {
+    java.util.Map<ClienteMensual, Integer> conteo = new java.util.HashMap<>();
+    for (Contrato c : controlador.getContratos()) {
+      conteo.put(c.getCliente(), conteo.getOrDefault(c.getCliente(), 0) + 1);
+    }
+    java.util.List<java.util.Map.Entry<ClienteMensual, Integer>> lista = new java.util.ArrayList<>(conteo.entrySet());
+    lista.sort((a, b) -> b.getValue() - a.getValue());
+    String[] columnas = {"Cliente", "Cantidad de Vehículos"};
+    DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
+    for (var e : lista) {
+      modelo.addRow(new Object[]{e.getKey().toString(), e.getValue()});
+    }
+    return new JTable(modelo);
   }
 }
