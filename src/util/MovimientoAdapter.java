@@ -1,5 +1,8 @@
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import dominio.Entrada;
+import dominio.Salida;
+import dominio.ServicioAdicional;
 
 /**
  * Clase adaptadora que unifica los diferentes tipos de movimientos

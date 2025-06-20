@@ -3,15 +3,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 public class VentanaReportes extends JFrame implements ModoOscuroObserver, ReportesObserver {
   private ControladorSistema controlador;
@@ -166,24 +159,11 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     String filtroTipo = (String) comboFiltroTipo.getSelectedItem();
     boolean ordenDescendente = checkOrdenDescendente.isSelected();
 
-    List<MovimientoAdapter> movimientos = obtenerMovimientosVehiculo(vehiculoSeleccionado, filtroTipo);
+    // Obtener movimientos del controlador
+    ArrayList<MovimientoAdapter> movimientos = controlador.obtenerMovimientosVehiculo(vehiculoSeleccionado, filtroTipo);
 
-    // Ordenar movimientos
-    if (ordenDescendente) {
-      Collections.sort(movimientos, new Comparator<MovimientoAdapter>() {
-        @Override
-        public int compare(MovimientoAdapter m1, MovimientoAdapter m2) {
-          return m2.getFechaHora().compareTo(m1.getFechaHora());
-        }
-      });
-    } else {
-      Collections.sort(movimientos, new Comparator<MovimientoAdapter>() {
-        @Override
-        public int compare(MovimientoAdapter m1, MovimientoAdapter m2) {
-          return m1.getFechaHora().compareTo(m2.getFechaHora());
-        }
-      });
-    }
+    // Ordenar movimientos usando el controlador
+    movimientos = controlador.ordenarMovimientos(movimientos, ordenDescendente);
 
     // Llenar tabla
     for (MovimientoAdapter movimiento : movimientos) {
@@ -200,39 +180,6 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     lblEstado.setText("Mostrando " + movimientos.size() + " movimientos para " + vehiculoSeleccionado.getMatricula());
   }
 
-  private List<MovimientoAdapter> obtenerMovimientosVehiculo(Vehiculo vehiculo, String filtroTipo) {
-    List<MovimientoAdapter> movimientos = new ArrayList<>();
-
-    // Obtener entradas
-    if (filtroTipo.equals("Todos") || filtroTipo.equals("Entrada")) {
-      for (Entrada entrada : controlador.getEntradas()) {
-        if (entrada.getVehiculo().equals(vehiculo)) {
-          movimientos.add(new MovimientoAdapter(entrada));
-        }
-      }
-    }
-
-    // Obtener salidas
-    if (filtroTipo.equals("Todos") || filtroTipo.equals("Salida")) {
-      for (Salida salida : controlador.getSalidas()) {
-        if (salida.getEntrada().getVehiculo().equals(vehiculo)) {
-          movimientos.add(new MovimientoAdapter(salida));
-        }
-      }
-    }
-
-    // Obtener servicios adicionales
-    if (filtroTipo.equals("Todos") || filtroTipo.equals("Servicio Adicional")) {
-      for (ServicioAdicional servicio : controlador.getServiciosAdicionales()) {
-        if (servicio.getVehiculo().equals(vehiculo)) {
-          movimientos.add(new MovimientoAdapter(servicio));
-        }
-      }
-    }
-
-    return movimientos;
-  }
-
   private void exportarATxt() {
     Vehiculo vehiculoSeleccionado = (Vehiculo) comboVehiculos.getSelectedItem();
     if (vehiculoSeleccionado == null) {
@@ -243,32 +190,15 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     }
 
     String nombreArchivo = vehiculoSeleccionado.getMatricula() + ".txt";
+    String filtroTipo = (String) comboFiltroTipo.getSelectedItem();
 
-    try (PrintWriter writer = new PrintWriter(new FileWriter(nombreArchivo))) {
-      writer.println("HISTORIAL DE MOVIMIENTOS - VEHÍCULO: " + vehiculoSeleccionado.getMatricula());
-      writer.println(
-          "Fecha de exportación: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
-      writer.println(crearLineaSeparadora(80));
-      writer.println();
+    try {
+      ArrayList<MovimientoAdapter> movimientos = controlador.obtenerMovimientosVehiculo(vehiculoSeleccionado,
+          filtroTipo);
+      boolean ordenDescendente = checkOrdenDescendente.isSelected();
+      movimientos = controlador.ordenarMovimientos(movimientos, ordenDescendente);
 
-      // Escribir encabezados
-      writer.printf("%-15s %-12s %-8s %-20s %-30s %-15s%n",
-          "TIPO", "FECHA", "HORA", "EMPLEADO", "DETALLES", "COSTO/DURACIÓN");
-      writer.println(crearLineaSeparadora(80));
-
-      // Escribir datos de la tabla
-      for (int i = 0; i < modeloTabla.getRowCount(); i++) {
-        writer.printf("%-15s %-12s %-8s %-20s %-30s %-15s%n",
-            modeloTabla.getValueAt(i, 0),
-            modeloTabla.getValueAt(i, 1),
-            modeloTabla.getValueAt(i, 2),
-            modeloTabla.getValueAt(i, 3),
-            modeloTabla.getValueAt(i, 4),
-            modeloTabla.getValueAt(i, 5));
-      }
-
-      writer.println();
-      writer.println("Total de movimientos: " + modeloTabla.getRowCount());
+      controlador.exportarMovimientosATxt(vehiculoSeleccionado, movimientos, nombreArchivo);
 
       JOptionPane.showMessageDialog(this,
           "Archivo exportado exitosamente: " + nombreArchivo,
@@ -279,14 +209,6 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
           "Error al exportar el archivo: " + e.getMessage(),
           "Error", JOptionPane.ERROR_MESSAGE);
     }
-  }
-
-  private String crearLineaSeparadora(int longitud) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < longitud; i++) {
-      sb.append("=");
-    }
-    return sb.toString();
   }
 
   private void aplicarEstilos() {
@@ -365,74 +287,50 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
   }
 
   private JTable crearTablaServiciosMasUtilizados() {
-    java.util.Map<String, Integer> conteo = new java.util.HashMap<>();
-    for (ServicioAdicional s : controlador.getServiciosAdicionales()) {
-      conteo.put(s.getTipo(), conteo.getOrDefault(s.getTipo(), 0) + 1);
-    }
+    ArrayList<Object[]> datos = controlador.obtenerServiciosMasUtilizados();
     String[] columnas = { "Tipo de Servicio", "Cantidad" };
     DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
-    conteo.entrySet().stream()
-        .sorted((a, b) -> b.getValue() - a.getValue())
-        .forEach(e -> modelo.addRow(new Object[] { e.getKey(), e.getValue() }));
+
+    for (Object[] fila : datos) {
+      modelo.addRow(fila);
+    }
+
     return new JTable(modelo);
   }
 
   private JTable crearTablaEstadiasMasLargas() {
-    java.util.List<Object[]> estadias = new java.util.ArrayList<>();
-    for (Salida salida : controlador.getSalidas()) {
-      if (salida.getEntrada() != null) {
-        java.time.LocalDateTime entrada = java.time.LocalDateTime.of(salida.getEntrada().getFecha(),
-            salida.getEntrada().getHora());
-        java.time.LocalDateTime salidaDT = java.time.LocalDateTime.of(salida.getFecha(), salida.getHora());
-        long duracion = java.time.Duration.between(entrada, salidaDT).toMinutes();
-        estadias.add(new Object[] { salida.getEntrada().getVehiculo().getMatricula(), duracion });
-      }
-    }
-    estadias.sort((a, b) -> Long.compare((long) b[1], (long) a[1]));
+    ArrayList<Object[]> datos = controlador.obtenerEstadiasMasLargas();
     String[] columnas = { "Vehículo", "Duración (min)" };
     DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
-    for (Object[] fila : estadias) {
+
+    for (Object[] fila : datos) {
       modelo.addRow(fila);
     }
+
     return new JTable(modelo);
   }
 
   private JTable crearTablaEmpleadosMenosMovimientos() {
-    java.util.Map<Empleado, Integer> conteo = new java.util.HashMap<>();
-    for (Empleado e : controlador.getEmpleados())
-      conteo.put(e, 0);
-    for (Entrada entrada : controlador.getEntradas()) {
-      conteo.put(entrada.getEmpleadoRecibe(), conteo.getOrDefault(entrada.getEmpleadoRecibe(), 0) + 1);
-    }
-    for (Salida salida : controlador.getSalidas()) {
-      conteo.put(salida.getEmpleadoEntrega(), conteo.getOrDefault(salida.getEmpleadoEntrega(), 0) + 1);
-    }
-    for (ServicioAdicional s : controlador.getServiciosAdicionales()) {
-      conteo.put(s.getEmpleado(), conteo.getOrDefault(s.getEmpleado(), 0) + 1);
-    }
-
-    java.util.List<java.util.Map.Entry<Empleado, Integer>> lista = new java.util.ArrayList<>(conteo.entrySet());
-    lista.sort(java.util.Map.Entry.comparingByValue());
+    ArrayList<Object[]> datos = controlador.obtenerEmpleadosMenosMovimientos();
     String[] columnas = { "Empleado (Nombre - Cédula)", "Movimientos" };
     DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
-    for (var e : lista) {
-      modelo.addRow(new Object[] { e.getKey().getNombre() + " - " + e.getKey().getCedula(), e.getValue() });
+
+    for (Object[] fila : datos) {
+      modelo.addRow(fila);
     }
+
     return new JTable(modelo);
   }
 
   private JTable crearTablaClientesMasVehiculos() {
-    java.util.Map<ClienteMensual, Integer> conteo = new java.util.HashMap<>();
-    for (Contrato c : controlador.getContratos()) {
-      conteo.put(c.getCliente(), conteo.getOrDefault(c.getCliente(), 0) + 1);
-    }
-    java.util.List<java.util.Map.Entry<ClienteMensual, Integer>> lista = new java.util.ArrayList<>(conteo.entrySet());
-    lista.sort((a, b) -> b.getValue() - a.getValue());
+    ArrayList<Object[]> datos = controlador.obtenerClientesMasVehiculos();
     String[] columnas = { "Cliente", "Cantidad de Vehículos" };
     DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
-    for (var e : lista) {
-      modelo.addRow(new Object[] { e.getKey().toString(), e.getValue() });
+
+    for (Object[] fila : datos) {
+      modelo.addRow(fila);
     }
+
     return new JTable(modelo);
   }
 }
