@@ -564,4 +564,14 @@ public class ControladorSistema implements Serializable {
     vehiculo.setDentroParking(true);
     entradas.add(entrada);
   }
+
+  public ArrayList<Vehiculo> getVehiculosSinContrato() {
+    ArrayList<Vehiculo> libres = new ArrayList<>();
+    for (Vehiculo v : vehiculos) {
+      if (!tieneContrato(v)) {
+        libres.add(v);
+      }
+    }
+    return libres;
+  }
 }

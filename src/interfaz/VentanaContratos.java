@@ -122,7 +122,8 @@ public class VentanaContratos extends JPanel implements ModoOscuroObserver {
     for (ClienteMensual cliente : controlador.getClientes()) {
       cmbClientes.addItem(cliente);
     }
-    for (Vehiculo vehiculo : controlador.getVehiculos()) {
+    // Solo mostrar vehículos sin contrato
+    for (Vehiculo vehiculo : controlador.getVehiculosSinContrato()) {
       cmbVehiculos.addItem(vehiculo);
     }
     for (Empleado empleado : controlador.getEmpleados()) {
@@ -161,9 +162,7 @@ public class VentanaContratos extends JPanel implements ModoOscuroObserver {
 
       controlador.agregarContrato(cliente, vehiculo, empleado, valorMensual);
 
-      // Actualizar interfaz
-      actualizarTabla();
-      limpiarCampos();
+      refrescarDatos();
       mostrarExito("Contrato agregado exitosamente");
     } catch (IllegalArgumentException e) {
       mostrarError(e.getMessage());

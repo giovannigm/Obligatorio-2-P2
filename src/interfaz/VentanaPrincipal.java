@@ -89,7 +89,8 @@ public class VentanaPrincipal extends JFrame {
         menuVarios.add(itemGrabarDatos);
         itemMiniJuego = new JMenuItem("MiniJuego");
         menuVarios.add(itemMiniJuego);
-        menuVarios.add(new JMenuItem("Información de Autores"));
+        JMenuItem itemInformacionAutores = new JMenuItem("Información de Autores");
+        menuVarios.add(itemInformacionAutores);
 
         // Menú Terminar
         menuTerminar = new JMenu("Terminar");
@@ -338,6 +339,26 @@ public class VentanaPrincipal extends JFrame {
                 public void windowClosed(java.awt.event.WindowEvent e) {
                     eliminarObservador(panel);
                     ventanasSecundarias.remove(frameSalida);
+                }
+            });
+        });
+
+        // Listener para abrir VentanaInformacionAutores en una ventana aparte
+        itemInformacionAutores.addActionListener(e -> {
+            JFrame frameAutores = new JFrame("Información de Autores");
+            frameAutores.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frameAutores.setSize(500, 400);
+            frameAutores.setLocationRelativeTo(this);
+            frameAutores.setLayout(new BorderLayout());
+            VentanaInformacionAutores panel = new VentanaInformacionAutores(modoOscuro, controlador);
+            agregarObservador(panel);
+            frameAutores.add(panel, BorderLayout.CENTER);
+            frameAutores.setVisible(true);
+            ventanasSecundarias.add(frameAutores);
+            frameAutores.addWindowListener(new java.awt.event.WindowAdapter() {
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    eliminarObservador(panel);
+                    ventanasSecundarias.remove(frameAutores);
                 }
             });
         });
