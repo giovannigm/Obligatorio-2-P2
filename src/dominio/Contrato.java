@@ -1,3 +1,5 @@
+// Autores: Giovanni - 288127,  Nicolas - 258264
+
 import java.io.Serializable;
 
 public class Contrato implements Serializable {

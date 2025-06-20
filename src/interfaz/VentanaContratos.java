@@ -1,3 +1,5 @@
+// Autores: Giovanni - 288127,  Nicolas - 258264
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
