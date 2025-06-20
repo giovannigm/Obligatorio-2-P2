@@ -452,6 +452,10 @@ public class ControladorSistema implements Serializable {
 
   public void agregarSalida(Salida salida) {
     salidas.add(salida);
+    // Actualizar el estado del vehículo para que vuelva a estar fuera del parking
+    if (salida != null && salida.getEntrada() != null && salida.getEntrada().getVehiculo() != null) {
+        salida.getEntrada().getVehiculo().setDentroParking(false);
+    }
     notificarReportesObservers();
   }
 
