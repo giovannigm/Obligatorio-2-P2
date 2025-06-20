@@ -101,10 +101,12 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
 
     private void cargarVehiculos() {
         comboVehiculos.removeAllItems();
+        comboVehiculos.addItem(""); // Opción vacía
         List<Vehiculo> vehiculos = controlador.getVehiculosFueraParking();
         for (Vehiculo v : vehiculos) {
             comboVehiculos.addItem(v.getMatricula() + " - " + v.getModelo());
         }
+        comboVehiculos.setSelectedIndex(0); // Selecciona la opción vacía por defecto
     }
 
     private void cargarEmpleados() {
@@ -117,11 +119,11 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
 
     private void mostrarInfoContrato() {
         int idx = comboVehiculos.getSelectedIndex();
-        if (idx == -1) {
+        if (idx <= 0) { // Cambiado para ignorar la opción vacía
             lblContrato.setText("Tiene contrato: ");
             return;
         }
-        Vehiculo v = controlador.getVehiculosFueraParking().get(idx);
+        Vehiculo v = controlador.getVehiculosFueraParking().get(idx - 1); // Ajuste de índice
         boolean tieneContrato = controlador.tieneContrato(v);
         lblContrato.setText("Tiene contrato: " + (tieneContrato ? "Sí" : "No"));
         lblContrato.setForeground(tieneContrato ? Color.GREEN.darker() : Color.RED);
@@ -130,15 +132,15 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
     private void registrarEntrada() {
         int idxVehiculo = comboVehiculos.getSelectedIndex();
         int idxEmpleado = comboEmpleados.getSelectedIndex();
-        if (idxVehiculo == -1 || idxEmpleado == -1) {
-            JOptionPane.showMessageDialog(this, "Debe seleccionar vehículo y empleado.", "Error",
+        if (idxVehiculo <= 0 || idxEmpleado == -1) { // Cambiado para ignorar la opción vacía
+            JOptionPane.showMessageDialog(this, "Debe seleccionar vehículo", "Error",
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
         String fecha = txtFecha.getText().trim();
         String hora = txtHora.getText().trim();
         String notas = txtNotas.getText().trim();
-        Vehiculo vehiculo = controlador.getVehiculosFueraParking().get(idxVehiculo);
+        Vehiculo vehiculo = controlador.getVehiculosFueraParking().get(idxVehiculo - 1); // Ajuste de índice
         Empleado empleado = controlador.getEmpleados().get(idxEmpleado);
         try {
             controlador.registrarEntrada(vehiculo, fecha, hora, notas, empleado);
@@ -149,6 +151,9 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
             txtHora.setText(java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
             txtNotas.setText("");
             lblContrato.setText(" ");
+        } catch (java.time.format.DateTimeParseException ex) {
+            JOptionPane.showMessageDialog(this, "Error en formato de fecha u hora. Use YYYY-MM-DD y HH:MM. 24Hs",
+                    "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
