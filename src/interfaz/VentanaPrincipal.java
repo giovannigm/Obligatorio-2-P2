@@ -27,7 +27,7 @@ public class VentanaPrincipal extends JFrame {
         // ventanas
         this.controlador = new ControladorSistema();
 
-        setTitle("Obligatorio Prog 2 - Autor: Giovanni - 288127,  Nicolas - 258264");
+        setTitle("Obligatorio Prog 2 - Autores: Giovanni - 288127,  Nicolas - 258264");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);

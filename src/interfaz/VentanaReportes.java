@@ -26,7 +26,6 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
   private DefaultTableModel modeloTabla;
   private JButton btnExportar;
   private JLabel lblEstado;
-  private JPanel panelEstadisticas;
 
   public VentanaReportes(ControladorSistema controlador, boolean modoOscuro) {
     this.controlador = controlador;
@@ -50,10 +49,12 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     tabbedPane = new JTabbedPane();
     JPanel panelHistorial = crearPanelHistorialVehiculo();
     tabbedPane.addTab("Historial", panelHistorial);
+
     JPanel panelMovimiento = new JPanel();
     panelMovimiento.add(new JLabel("Panel de Movimiento (en desarrollo)"));
     tabbedPane.addTab("Movimiento", panelMovimiento);
-    panelEstadisticas = crearPanelEstadisticasGenerales();
+
+    JPanel panelEstadisticas = crearPanelEstadisticasGenerales();
     tabbedPane.addTab("Estadísticas Generales", panelEstadisticas);
     add(tabbedPane);
   }
@@ -368,11 +369,11 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     for (ServicioAdicional s : controlador.getServiciosAdicionales()) {
       conteo.put(s.getTipo(), conteo.getOrDefault(s.getTipo(), 0) + 1);
     }
-    String[] columnas = {"Tipo de Servicio", "Cantidad"};
+    String[] columnas = { "Tipo de Servicio", "Cantidad" };
     DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
     conteo.entrySet().stream()
-      .sorted((a, b) -> b.getValue() - a.getValue())
-      .forEach(e -> modelo.addRow(new Object[]{e.getKey(), e.getValue()}));
+        .sorted((a, b) -> b.getValue() - a.getValue())
+        .forEach(e -> modelo.addRow(new Object[] { e.getKey(), e.getValue() }));
     return new JTable(modelo);
   }
 
@@ -380,14 +381,15 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     java.util.List<Object[]> estadias = new java.util.ArrayList<>();
     for (Salida salida : controlador.getSalidas()) {
       if (salida.getEntrada() != null) {
-        java.time.LocalDateTime entrada = java.time.LocalDateTime.of(salida.getEntrada().getFecha(), salida.getEntrada().getHora());
+        java.time.LocalDateTime entrada = java.time.LocalDateTime.of(salida.getEntrada().getFecha(),
+            salida.getEntrada().getHora());
         java.time.LocalDateTime salidaDT = java.time.LocalDateTime.of(salida.getFecha(), salida.getHora());
         long duracion = java.time.Duration.between(entrada, salidaDT).toMinutes();
-        estadias.add(new Object[]{salida.getEntrada().getVehiculo().getMatricula(), duracion});
+        estadias.add(new Object[] { salida.getEntrada().getVehiculo().getMatricula(), duracion });
       }
     }
-    estadias.sort((a, b) -> Long.compare((long)b[1], (long)a[1]));
-    String[] columnas = {"Vehículo", "Duración (min)"};
+    estadias.sort((a, b) -> Long.compare((long) b[1], (long) a[1]));
+    String[] columnas = { "Vehículo", "Duración (min)" };
     DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
     for (Object[] fila : estadias) {
       modelo.addRow(fila);
@@ -397,7 +399,8 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
 
   private JTable crearTablaEmpleadosMenosMovimientos() {
     java.util.Map<Empleado, Integer> conteo = new java.util.HashMap<>();
-    for (Empleado e : controlador.getEmpleados()) conteo.put(e, 0);
+    for (Empleado e : controlador.getEmpleados())
+      conteo.put(e, 0);
     for (Entrada entrada : controlador.getEntradas()) {
       conteo.put(entrada.getEmpleadoRecibe(), conteo.getOrDefault(entrada.getEmpleadoRecibe(), 0) + 1);
     }
@@ -407,17 +410,13 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     for (ServicioAdicional s : controlador.getServiciosAdicionales()) {
       conteo.put(s.getEmpleado(), conteo.getOrDefault(s.getEmpleado(), 0) + 1);
     }
-    // Contar contratos como movimiento del empleado
-    for (Contrato contrato : controlador.getContratos()) {
-      Empleado empleado = contrato.getEmpleado();
-      conteo.put(empleado, conteo.getOrDefault(empleado, 0) + 1);
-    }
+
     java.util.List<java.util.Map.Entry<Empleado, Integer>> lista = new java.util.ArrayList<>(conteo.entrySet());
     lista.sort(java.util.Map.Entry.comparingByValue());
-    String[] columnas = {"Empleado", "Movimientos"};
+    String[] columnas = { "Empleado (Nombre - Cédula)", "Movimientos" };
     DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
     for (var e : lista) {
-      modelo.addRow(new Object[]{e.getKey().getNombre(), e.getValue()});
+      modelo.addRow(new Object[] { e.getKey().getNombre() + " - " + e.getKey().getCedula(), e.getValue() });
     }
     return new JTable(modelo);
   }
@@ -429,10 +428,10 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     }
     java.util.List<java.util.Map.Entry<ClienteMensual, Integer>> lista = new java.util.ArrayList<>(conteo.entrySet());
     lista.sort((a, b) -> b.getValue() - a.getValue());
-    String[] columnas = {"Cliente", "Cantidad de Vehículos"};
+    String[] columnas = { "Cliente", "Cantidad de Vehículos" };
     DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
     for (var e : lista) {
-      modelo.addRow(new Object[]{e.getKey().toString(), e.getValue()});
+      modelo.addRow(new Object[] { e.getKey().toString(), e.getValue() });
     }
     return new JTable(modelo);
   }

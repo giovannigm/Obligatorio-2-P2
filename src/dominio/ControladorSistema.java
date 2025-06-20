@@ -358,7 +358,6 @@ public class ControladorSistema implements Serializable {
     Contrato nuevoContrato = new Contrato(cliente, vehiculo, empleado, valor);
     contratos.add(nuevoContrato);
     notificarReportesObservers();
-    notificarContratosObservers();
   }
 
   public ArrayList<Contrato> getContratos() {
