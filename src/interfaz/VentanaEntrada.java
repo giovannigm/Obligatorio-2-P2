@@ -133,7 +133,7 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
         int idxVehiculo = comboVehiculos.getSelectedIndex();
         int idxEmpleado = comboEmpleados.getSelectedIndex();
         if (idxVehiculo <= 0 || idxEmpleado == -1) { // Cambiado para ignorar la opción vacía
-            JOptionPane.showMessageDialog(this, "Debe seleccionar vehículo y empleado.", "Error",
+            JOptionPane.showMessageDialog(this, "Debe seleccionar vehículo", "Error",
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -151,6 +151,9 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
             txtHora.setText(java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
             txtNotas.setText("");
             lblContrato.setText(" ");
+        } catch (java.time.format.DateTimeParseException ex) {
+            JOptionPane.showMessageDialog(this, "Error en formato de fecha u hora. Use YYYY-MM-DD y HH:MM. 24Hs",
+                    "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }

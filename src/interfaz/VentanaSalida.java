@@ -134,8 +134,14 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         String comentario = txtComentario.getText().trim();
 
         if (entrada == null || empleado == null || fechaStr.isEmpty() || horaStr.isEmpty()) {
-            Estilos.mostrarError(lblEstado, "Complete todos los campos.");
+            JOptionPane.showMessageDialog(this, "Complete todos los campos", "Error", JOptionPane.ERROR_MESSAGE);
             return;
+        }
+        if (entrada.getVehiculo() == null) {
+            JOptionPane.showMessageDialog(this, "Sin Entradas.", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+
         }
         try {
             LocalDate fecha = LocalDate.parse(fechaStr);
@@ -155,8 +161,11 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
                     "Tiempo: " + horas + "h " + minutos + "m. Tiene Contrato: " + tieneContrato);
             cargarEntradasSinSalida();
             txtComentario.setText("");
+        } catch (java.time.format.DateTimeParseException ex) {
+            JOptionPane.showMessageDialog(this, "Error en formato de fecha u hora. Use YYYY-MM-DD y HH:MM. 24Hs",
+                    "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
-            Estilos.mostrarError(lblEstado, "Error en formato de fecha/hora.");
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
