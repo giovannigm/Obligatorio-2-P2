@@ -302,7 +302,12 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     cmbTipoServicio.setSelectedItem(tipo);
     txtFecha.setText(fecha);
     txtHora.setText(hora);
-    txtCosto.setText(costo);
+    // Asegurarse de que el costo se muestre correctamente (reemplazar coma por punto si es necesario)
+    if (costo != null) {
+      txtCosto.setText(costo.replace(",", ".").replaceAll("[^0-9.]", ""));
+    } else {
+      txtCosto.setText("");
+    }
 
     // Seleccionar vehículo y empleado correspondientes
     for (int i = 0; i < cmbVehiculos.getItemCount(); i++) {
