@@ -2,6 +2,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.*;
 import java.awt.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
@@ -127,7 +129,7 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     lblFecha = new JLabel("Fecha (dd/MM/yyyy):");
     panelFormulario.add(lblFecha, gbc);
     gbc.gridx = 1;
-    txtFecha = new JTextField(15);
+    txtFecha = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), 15);
     ((AbstractDocument) txtFecha.getDocument()).setDocumentFilter(fechaFilter);
     panelFormulario.add(txtFecha, gbc);
 
@@ -137,7 +139,7 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     lblHora = new JLabel("Hora (HH:mm):");
     panelFormulario.add(lblHora, gbc);
     gbc.gridx = 1;
-    txtHora = new JTextField(15);
+    txtHora = new JTextField(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")), 15);
     ((AbstractDocument) txtHora.getDocument()).setDocumentFilter(horaFilter);
     panelFormulario.add(txtHora, gbc);
 
@@ -267,6 +269,9 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
       // Actualizar interfaz
       actualizarTabla();
       limpiarCampos();
+      // Restablecer fecha y hora actuales
+      txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+      txtHora.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
       mostrarExito("Servicio adicional agregado exitosamente");
     } catch (IllegalArgumentException e) {
       mostrarError(e.getMessage());

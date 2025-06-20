@@ -11,7 +11,7 @@ public class VentanaPrincipal extends JFrame {
     private JButton btnModo;
     private JMenu menuGestion, menuMov, menuVarios, menuTerminar;
     private JMenuItem itemGestionVehiculos, itemGestionClientes, itemGestionEmpleados, itemGestionContratos,
-            itemMiniJuego, itemServiciosAdicionales, itemGrabarDatos, itemRecuperarDatos, itemSalidas;
+            itemMiniJuego, itemServiciosAdicionales, itemGrabarDatos, itemRecuperarDatos, itemSalidas, itemReportes;
     private List<JFrame> ventanasSecundarias = new ArrayList<>();
     private ControladorSistema controlador;
     private List<ModoOscuroObserver> observadores = new ArrayList<>();
@@ -27,7 +27,7 @@ public class VentanaPrincipal extends JFrame {
         // ventanas
         this.controlador = new ControladorSistema();
 
-        setTitle("Obligatorio Prog 2 - Autor: Giovanni - 288127,  Nicolas - 258264");
+        setTitle("Obligatorio Prog 2 - Autores: Giovanni - 288127,  Nicolas - 258264");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -82,7 +82,8 @@ public class VentanaPrincipal extends JFrame {
 
         // Menú Varios
         menuVarios = new JMenu("Varios");
-        menuVarios.add(new JMenuItem("Reportes"));
+        itemReportes = new JMenuItem("Reportes");
+        menuVarios.add(itemReportes);
         itemRecuperarDatos = new JMenuItem("Recuperación de datos");
         menuVarios.add(itemRecuperarDatos);
         itemGrabarDatos = new JMenuItem("Grabación de datos");
@@ -359,6 +360,20 @@ public class VentanaPrincipal extends JFrame {
                 public void windowClosed(java.awt.event.WindowEvent e) {
                     eliminarObservador(panel);
                     ventanasSecundarias.remove(frameAutores);
+                }
+            });
+        });
+
+        // Listener para abrir VentanaReportes en una ventana aparte
+        itemReportes.addActionListener(e -> {
+            VentanaReportes frameReportes = new VentanaReportes(controlador, modoOscuro);
+            agregarObservador(frameReportes);
+            frameReportes.setVisible(true);
+            ventanasSecundarias.add(frameReportes);
+            frameReportes.addWindowListener(new java.awt.event.WindowAdapter() {
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    eliminarObservador(frameReportes);
+                    ventanasSecundarias.remove(frameReportes);
                 }
             });
         });

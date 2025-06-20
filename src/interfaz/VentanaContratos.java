@@ -3,7 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class VentanaContratos extends JPanel implements ModoOscuroObserver {
+public class VentanaContratos extends JPanel implements ModoOscuroObserver, ContratosObserver {
   private JComboBox<ClienteMensual> cmbClientes;
   private JComboBox<Vehiculo> cmbVehiculos;
   private JComboBox<Empleado> cmbEmpleados;
@@ -18,6 +18,7 @@ public class VentanaContratos extends JPanel implements ModoOscuroObserver {
   public VentanaContratos(boolean modoOscuro, ControladorSistema controlador) {
     this.modoOscuro = modoOscuro;
     this.controlador = controlador;
+    this.controlador.addContratosObserver(this);
     initComponents();
     actualizarTabla();
     actualizarCombos();
@@ -211,8 +212,20 @@ public class VentanaContratos extends JPanel implements ModoOscuroObserver {
     setModoOscuro(modoOscuro);
   }
 
+  public void contratosActualizados() {
+    SwingUtilities.invokeLater(this::actualizarTabla);
+  }
+
   public void actualizarControlador(ControladorSistema nuevoControlador) {
+    this.controlador.removeContratosObserver(this);
     this.controlador = nuevoControlador;
+    this.controlador.addContratosObserver(this);
     refrescarDatos();
+  }
+
+  @Override
+  public void removeNotify() {
+    super.removeNotify();
+    if (controlador != null) controlador.removeContratosObserver(this);
   }
 }
