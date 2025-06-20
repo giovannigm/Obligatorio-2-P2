@@ -113,7 +113,7 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
         comboEmpleados.removeAllItems();
         List<Empleado> empleados = controlador.getEmpleados();
         for (Empleado e : empleados) {
-            comboEmpleados.addItem(e.getNombre());
+            comboEmpleados.addItem(e.toString());
         }
     }
 

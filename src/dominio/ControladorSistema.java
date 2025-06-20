@@ -18,6 +18,9 @@ public class ControladorSistema implements Serializable {
   private ArrayList<Salida> salidas;
   private ArrayList<ServicioAdicional> servicios;
 
+  private transient ArrayList<ReportesObserver> reportesObservers = new ArrayList<>();
+  private transient ArrayList<ContratosObserver> contratosObservers = new ArrayList<>();
+
   public ControladorSistema() {
     this.clientes = new ArrayList<>();
     this.vehiculos = new ArrayList<>();
@@ -229,12 +232,14 @@ public class ControladorSistema implements Serializable {
     if (cliente == null) {
       throw new IllegalArgumentException("No se encontró el cliente con cédula: " + cedula);
     }
-
     // Eliminar contratos asociados al cliente
-    contratos.removeIf(contrato -> contrato.getCliente().equals(cliente));
-
+    boolean contratosEliminados = contratos.removeIf(contrato -> contrato.getCliente().equals(cliente));
     // Eliminar el cliente
     clientes.remove(cliente);
+    notificarReportesObservers();
+    if (contratosEliminados) {
+      notificarContratosObservers();
+    }
   }
 
   public ClienteMensual buscarCliente(String cedula) {
@@ -354,6 +359,7 @@ public class ControladorSistema implements Serializable {
     double valor = Double.parseDouble(valorMensual.trim());
     Contrato nuevoContrato = new Contrato(cliente, vehiculo, empleado, valor);
     contratos.add(nuevoContrato);
+    notificarReportesObservers();
   }
 
   public ArrayList<Contrato> getContratos() {
@@ -395,6 +401,7 @@ public class ControladorSistema implements Serializable {
     ServicioAdicional nuevoServicio = new ServicioAdicional(tipo.trim(), fechaServicio, horaServicio, vehiculo,
         empleado, valorCosto);
     servicios.add(nuevoServicio);
+    notificarReportesObservers();
   }
 
   public ArrayList<ServicioAdicional> getServiciosAdicionales() {
@@ -441,14 +448,11 @@ public class ControladorSistema implements Serializable {
     }
   }
 
-  // ========== MÉTODOS PARA OTRAS ENTIDADES ==========
-
-  public void agregarEntrada(Entrada entrada) {
-    entradas.add(entrada);
-  }
+  // ========== MÉTODOS DE SALIDA ==========
 
   public void agregarSalida(Salida salida) {
     salidas.add(salida);
+    notificarReportesObservers();
   }
 
   public ArrayList<Entrada> getEntradas() {
@@ -563,5 +567,327 @@ public class ControladorSistema implements Serializable {
     Entrada entrada = new Entrada(vehiculo, fechaEntrada, horaEntrada, notas, empleado, tieneContrato);
     vehiculo.setDentroParking(true);
     entradas.add(entrada);
+    notificarReportesObservers();
+  }
+
+  // ========== MÉTODOS DE REPORTE ESTADISTICA OBSERVER ==========
+
+  public void addReportesObserver(ReportesObserver observer) {
+    if (!reportesObservers.contains(observer)) {
+      reportesObservers.add(observer);
+    }
+  }
+
+  public void removeReportesObserver(ReportesObserver observer) {
+    reportesObservers.remove(observer);
+  }
+
+  private void notificarReportesObservers() {
+    for (ReportesObserver observer : reportesObservers) {
+      observer.reportesActualizados();
+    }
+  }
+
+  // ========== MÉTODOS DE CONTRATO OBSERVER ==========
+
+  public void addContratosObserver(ContratosObserver observer) {
+    if (!contratosObservers.contains(observer)) {
+      contratosObservers.add(observer);
+    }
+  }
+
+  public void removeContratosObserver(ContratosObserver observer) {
+    contratosObservers.remove(observer);
+  }
+
+  private void notificarContratosObservers() {
+    for (ContratosObserver observer : contratosObservers) {
+      observer.contratosActualizados();
+    }
+  }
+
+  // ========== MÉTODOS DE REPORTES ==========
+
+  /**
+   * Obtiene los movimientos de un vehículo específico con filtro opcional
+   */
+  public ArrayList<MovimientoAdapter> obtenerMovimientosVehiculo(Vehiculo vehiculo, String filtroTipo) {
+    ArrayList<MovimientoAdapter> movimientos = new ArrayList<>();
+
+    // Obtener entradas
+    if (filtroTipo.equals("Todos") || filtroTipo.equals("Entrada")) {
+      for (Entrada entrada : entradas) {
+        if (entrada.getVehiculo().equals(vehiculo)) {
+          movimientos.add(new MovimientoAdapter(entrada));
+        }
+      }
+    }
+
+    // Obtener salidas
+    if (filtroTipo.equals("Todos") || filtroTipo.equals("Salida")) {
+      for (Salida salida : salidas) {
+        if (salida.getEntrada().getVehiculo().equals(vehiculo)) {
+          movimientos.add(new MovimientoAdapter(salida));
+        }
+      }
+    }
+
+    // Obtener servicios adicionales
+    if (filtroTipo.equals("Todos") || filtroTipo.equals("Servicio Adicional")) {
+      for (ServicioAdicional servicio : servicios) {
+        if (servicio.getVehiculo().equals(vehiculo)) {
+          movimientos.add(new MovimientoAdapter(servicio));
+        }
+      }
+    }
+
+    return movimientos;
+  }
+
+  /**
+   * Ordena los movimientos por fecha y hora
+   */
+  public ArrayList<MovimientoAdapter> ordenarMovimientos(ArrayList<MovimientoAdapter> movimientos,
+      boolean descendente) {
+    ArrayList<MovimientoAdapter> movimientosOrdenados = new ArrayList<>(movimientos);
+
+    if (descendente) {
+      for (int i = 0; i < movimientosOrdenados.size() - 1; i++) {
+        for (int j = i + 1; j < movimientosOrdenados.size(); j++) {
+          if (movimientosOrdenados.get(i).getFechaHora().isBefore(movimientosOrdenados.get(j).getFechaHora())) {
+            MovimientoAdapter temp = movimientosOrdenados.get(i);
+            movimientosOrdenados.set(i, movimientosOrdenados.get(j));
+            movimientosOrdenados.set(j, temp);
+          }
+        }
+      }
+    } else {
+      for (int i = 0; i < movimientosOrdenados.size() - 1; i++) {
+        for (int j = i + 1; j < movimientosOrdenados.size(); j++) {
+          if (movimientosOrdenados.get(i).getFechaHora().isAfter(movimientosOrdenados.get(j).getFechaHora())) {
+            MovimientoAdapter temp = movimientosOrdenados.get(i);
+            movimientosOrdenados.set(i, movimientosOrdenados.get(j));
+            movimientosOrdenados.set(j, temp);
+          }
+        }
+      }
+    }
+
+    return movimientosOrdenados;
+  }
+
+  /**
+   * Obtiene estadísticas de servicios más utilizados
+   */
+  public ArrayList<Object[]> obtenerServiciosMasUtilizados() {
+    ArrayList<Object[]> resultado = new ArrayList<>();
+
+    // Contar servicios por tipo
+    ArrayList<String> tipos = new ArrayList<>();
+    ArrayList<Integer> cantidades = new ArrayList<>();
+
+    for (ServicioAdicional servicio : servicios) {
+      String tipo = servicio.getTipo();
+      boolean encontrado = false;
+
+      for (int i = 0; i < tipos.size(); i++) {
+        if (tipos.get(i).equals(tipo)) {
+          cantidades.set(i, cantidades.get(i) + 1);
+          encontrado = true;
+          break;
+        }
+      }
+
+      if (!encontrado) {
+        tipos.add(tipo);
+        cantidades.add(1);
+      }
+    }
+
+    // Crear array de resultados
+    for (int i = 0; i < tipos.size(); i++) {
+      resultado.add(new Object[] { tipos.get(i), cantidades.get(i) });
+    }
+
+    // Ordenar por cantidad descendente
+    for (int i = 0; i < resultado.size() - 1; i++) {
+      for (int j = i + 1; j < resultado.size(); j++) {
+        if ((Integer) resultado.get(i)[1] < (Integer) resultado.get(j)[1]) {
+          Object[] temp = resultado.get(i);
+          resultado.set(i, resultado.get(j));
+          resultado.set(j, temp);
+        }
+      }
+    }
+
+    return resultado;
+  }
+
+  /**
+   * Obtiene estadísticas de estadías más largas
+   */
+  public ArrayList<Object[]> obtenerEstadiasMasLargas() {
+    ArrayList<Object[]> resultado = new ArrayList<>();
+
+    for (Salida salida : salidas) {
+      if (salida.getEntrada() != null) {
+        java.time.LocalDateTime entrada = java.time.LocalDateTime.of(salida.getEntrada().getFecha(),
+            salida.getEntrada().getHora());
+        java.time.LocalDateTime salidaDT = java.time.LocalDateTime.of(salida.getFecha(), salida.getHora());
+        long duracion = java.time.Duration.between(entrada, salidaDT).toMinutes();
+        resultado.add(new Object[] { salida.getEntrada().getVehiculo().getMatricula(), duracion });
+      }
+    }
+
+    // Ordenar por duración descendente
+    for (int i = 0; i < resultado.size() - 1; i++) {
+      for (int j = i + 1; j < resultado.size(); j++) {
+        if ((Long) resultado.get(i)[1] < (Long) resultado.get(j)[1]) {
+          Object[] temp = resultado.get(i);
+          resultado.set(i, resultado.get(j));
+          resultado.set(j, temp);
+        }
+      }
+    }
+
+    return resultado;
+  }
+
+  /**
+   * Obtiene estadísticas de empleados con menor cantidad de movimientos
+   */
+  public ArrayList<Object[]> obtenerEmpleadosMenosMovimientos() {
+    ArrayList<Object[]> resultado = new ArrayList<>();
+
+    // Inicializar contadores para todos los empleados
+    for (Empleado empleado : empleados) {
+      resultado.add(new Object[] { empleado.getNombre() + " - " + empleado.getCedula(), 0 });
+    }
+
+    // Contar movimientos por empleado
+    for (Entrada entrada : entradas) {
+      String nombreEmpleado = entrada.getEmpleadoRecibe().getNombre() + " - " + entrada.getEmpleadoRecibe().getCedula();
+      for (Object[] fila : resultado) {
+        if (fila[0].equals(nombreEmpleado)) {
+          fila[1] = (Integer) fila[1] + 1;
+          break;
+        }
+      }
+    }
+
+    for (Salida salida : salidas) {
+      String nombreEmpleado = salida.getEmpleadoEntrega().getNombre() + " - " + salida.getEmpleadoEntrega().getCedula();
+      for (Object[] fila : resultado) {
+        if (fila[0].equals(nombreEmpleado)) {
+          fila[1] = (Integer) fila[1] + 1;
+          break;
+        }
+      }
+    }
+
+    for (ServicioAdicional servicio : servicios) {
+      String nombreEmpleado = servicio.getEmpleado().getNombre() + " - " + servicio.getEmpleado().getCedula();
+      for (Object[] fila : resultado) {
+        if (fila[0].equals(nombreEmpleado)) {
+          fila[1] = (Integer) fila[1] + 1;
+          break;
+        }
+      }
+    }
+
+    // Ordenar por cantidad ascendente
+    for (int i = 0; i < resultado.size() - 1; i++) {
+      for (int j = i + 1; j < resultado.size(); j++) {
+        if ((Integer) resultado.get(i)[1] > (Integer) resultado.get(j)[1]) {
+          Object[] temp = resultado.get(i);
+          resultado.set(i, resultado.get(j));
+          resultado.set(j, temp);
+        }
+      }
+    }
+
+    return resultado;
+  }
+
+  /**
+   * Obtiene estadísticas de clientes con mayor cantidad de vehículos
+   */
+  public ArrayList<Object[]> obtenerClientesMasVehiculos() {
+    ArrayList<Object[]> resultado = new ArrayList<>();
+
+    // Contar vehículos por cliente
+    for (Contrato contrato : contratos) {
+      String nombreCliente = contrato.getCliente().toString();
+      boolean encontrado = false;
+
+      for (Object[] fila : resultado) {
+        if (fila[0].equals(nombreCliente)) {
+          fila[1] = (Integer) fila[1] + 1;
+          encontrado = true;
+          break;
+        }
+      }
+
+      if (!encontrado) {
+        resultado.add(new Object[] { nombreCliente, 1 });
+      }
+    }
+
+    // Ordenar por cantidad descendente
+    for (int i = 0; i < resultado.size() - 1; i++) {
+      for (int j = i + 1; j < resultado.size(); j++) {
+        if ((Integer) resultado.get(i)[1] < (Integer) resultado.get(j)[1]) {
+          Object[] temp = resultado.get(i);
+          resultado.set(i, resultado.get(j));
+          resultado.set(j, temp);
+        }
+      }
+    }
+
+    return resultado;
+  }
+
+  /**
+   * Exporta los movimientos de un vehículo a un archivo de texto
+   */
+  public void exportarMovimientosATxt(Vehiculo vehiculo, ArrayList<MovimientoAdapter> movimientos, String nombreArchivo)
+      throws IOException {
+    try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(nombreArchivo))) {
+      writer.println("HISTORIAL DE MOVIMIENTOS - VEHÍCULO: " + vehiculo.getMatricula());
+      writer.println("Fecha de exportación: "
+          + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+      writer.println(crearLineaSeparadora(80));
+      writer.println();
+
+      // Escribir encabezados
+      writer.printf("%-15s %-12s %-8s %-20s %-30s %-15s%n",
+          "TIPO", "FECHA", "HORA", "EMPLEADO", "DETALLES", "COSTO/DURACIÓN");
+      writer.println(crearLineaSeparadora(80));
+
+      // Escribir datos
+      for (MovimientoAdapter movimiento : movimientos) {
+        writer.printf("%-15s %-12s %-8s %-20s %-30s %-15s%n",
+            movimiento.getTipo(),
+            movimiento.getFecha(),
+            movimiento.getHora(),
+            movimiento.getEmpleado(),
+            movimiento.getDetalles(),
+            movimiento.getCostoDuracion());
+      }
+
+      writer.println();
+      writer.println("Total de movimientos: " + movimientos.size());
+    }
+  }
+
+  /**
+   * Crea una línea separadora para el archivo de exportación
+   */
+  private String crearLineaSeparadora(int longitud) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < longitud; i++) {
+      sb.append("=");
+    }
+    return sb.toString();
   }
 }
