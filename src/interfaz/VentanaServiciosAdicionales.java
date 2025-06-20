@@ -38,13 +38,13 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
   private void initComponents() {
     setLayout(new BorderLayout());
 
-    // Filtro para fecha (dd/MM/yyyy)
+    // Filtro para fecha (yyyy-MM-dd)
     DocumentFilter fechaFilter = new DocumentFilter() {
       @Override
       public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
           throws BadLocationException {
         String nuevoTexto = fb.getDocument().getText(0, fb.getDocument().getLength()) + string;
-        if (nuevoTexto.length() <= 10 && string.matches("[0-9/]*")) {
+        if (nuevoTexto.length() <= 10 && string.matches("[0-9-]*")) {
           super.insertString(fb, offset, string, attr);
         }
       }
@@ -55,7 +55,7 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
         String actual = fb.getDocument().getText(0, fb.getDocument().getLength());
         StringBuilder sb = new StringBuilder(actual);
         sb.replace(offset, offset + length, text);
-        if (sb.length() <= 10 && text.matches("[0-9/]*")) {
+        if (sb.length() <= 10 && text.matches("[0-9-]*")) {
           super.replace(fb, offset, length, text, attrs);
         }
       }
@@ -126,10 +126,10 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     // Fecha
     gbc.gridx = 0;
     gbc.gridy = 1;
-    lblFecha = new JLabel("Fecha (dd/MM/yyyy):");
+    lblFecha = new JLabel("Fecha (yyyy-MM-dd):");
     panelFormulario.add(lblFecha, gbc);
     gbc.gridx = 1;
-    txtFecha = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), 15);
+    txtFecha = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), 15);
     ((AbstractDocument) txtFecha.getDocument()).setDocumentFilter(fechaFilter);
     panelFormulario.add(txtFecha, gbc);
 
@@ -237,7 +237,7 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
   private void actualizarTabla() {
     modelo.setRowCount(0);
     ArrayList<ServicioAdicional> servicios = controlador.getServiciosAdicionales();
-    DateTimeFormatter formatterFecha = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    DateTimeFormatter formatterFecha = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     DateTimeFormatter formatterHora = DateTimeFormatter.ofPattern("HH:mm");
 
     for (ServicioAdicional servicio : servicios) {
@@ -270,7 +270,7 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
       actualizarTabla();
       limpiarCampos();
       // Restablecer fecha y hora actuales
-      txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+      txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
       txtHora.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
       mostrarExito("Servicio adicional agregado exitosamente");
     } catch (IllegalArgumentException e) {
@@ -302,7 +302,8 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     cmbTipoServicio.setSelectedItem(tipo);
     txtFecha.setText(fecha);
     txtHora.setText(hora);
-    // Asegurarse de que el costo se muestre correctamente (reemplazar coma por punto si es necesario)
+    // Asegurarse de que el costo se muestre correctamente (reemplazar coma por
+    // punto si es necesario)
     if (costo != null) {
       txtCosto.setText(costo.replace(",", ".").replaceAll("[^0-9.]", ""));
     } else {
