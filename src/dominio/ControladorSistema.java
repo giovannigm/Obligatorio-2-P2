@@ -890,4 +890,14 @@ public class ControladorSistema implements Serializable {
     }
     return sb.toString();
   }
+
+  public ArrayList<Vehiculo> getVehiculosSinContrato() {
+    ArrayList<Vehiculo> libres = new ArrayList<>();
+    for (Vehiculo v : vehiculos) {
+      if (!tieneContrato(v)) {
+        libres.add(v);
+      }
+    }
+    return libres;
+  }
 }
