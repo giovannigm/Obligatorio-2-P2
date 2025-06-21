@@ -52,9 +52,9 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
         // Fecha
         gbc.gridx = 0;
         gbc.gridy = 2;
-        panelForm.add(new JLabel("Fecha (YYYY-MM-DD):"), gbc);
+        panelForm.add(new JLabel("Fecha (DD-MM-YYYY):"), gbc);
         gbc.gridx = 1;
-        txtFecha = new JTextField(LocalDate.now().toString(), 10);
+        txtFecha = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")), 10);
         panelForm.add(txtFecha, gbc);
 
         // Hora
@@ -137,22 +137,25 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
-        String fecha = txtFecha.getText().trim();
+        String fechaInput = txtFecha.getText().trim();
         String hora = txtHora.getText().trim();
         String notas = txtNotas.getText().trim();
         Vehiculo vehiculo = controlador.getVehiculosFueraParking().get(idxVehiculo - 1); // Ajuste de índice
         Empleado empleado = controlador.getEmpleados().get(idxEmpleado);
         try {
+            // Convertir de DD-MM-YYYY a YYYY-MM-DD
+            LocalDate fechaDate = LocalDate.parse(fechaInput, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            String fecha = fechaDate.toString();
             controlador.registrarEntrada(vehiculo, fecha, hora, notas, empleado);
             JOptionPane.showMessageDialog(this, "Entrada registrada exitosamente.", "Éxito",
                     JOptionPane.INFORMATION_MESSAGE);
             cargarVehiculos();
-            txtFecha.setText(java.time.LocalDate.now().toString());
-            txtHora.setText(java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
+            txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+            txtHora.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
             txtNotas.setText("");
             lblContrato.setText(" ");
         } catch (java.time.format.DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "Error en formato de fecha u hora. Use YYYY-MM-DD y HH:MM. 24Hs",
+            JOptionPane.showMessageDialog(this, "Error en formato de fecha u hora. Use DD-MM-YYYY y HH:MM. 24Hs",
                     "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

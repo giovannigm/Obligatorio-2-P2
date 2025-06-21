@@ -163,11 +163,11 @@ public class ControladorSistema implements Serializable {
       throw new IllegalArgumentException("El costo es obligatorio");
     }
 
-    // Validar formato de fecha (dd/MM/yyyy)
+    // Validar formato de fecha (dd-MM-yyyy)
     try {
-      String[] partesFecha = fecha.trim().split("/");
+      String[] partesFecha = fecha.trim().split("-");
       if (partesFecha.length != 3) {
-        throw new IllegalArgumentException("Formato de fecha inválido. Use dd/MM/yyyy");
+        throw new IllegalArgumentException("Formato de fecha inválido. Use dd-MM-yyyy");
       }
       int dia = Integer.parseInt(partesFecha[0]);
       int mes = Integer.parseInt(partesFecha[1]);
@@ -177,7 +177,7 @@ public class ControladorSistema implements Serializable {
         throw new IllegalArgumentException("Fecha inválida");
       }
     } catch (NumberFormatException e) {
-      throw new IllegalArgumentException("Formato de fecha inválido. Use dd/MM/yyyy");
+      throw new IllegalArgumentException("Formato de fecha inválido. Use dd-MM-yyyy");
     }
 
     // Validar formato de hora (HH:mm)
@@ -383,7 +383,7 @@ public class ControladorSistema implements Serializable {
     validarCamposServicioAdicional(tipo, fecha, hora, vehiculo, empleado, costo);
 
     // Parsear fecha y hora
-    String[] partesFecha = fecha.trim().split("/");
+    String[] partesFecha = fecha.trim().split("-");
     int dia = Integer.parseInt(partesFecha[0]);
     int mes = Integer.parseInt(partesFecha[1]);
     int anio = Integer.parseInt(partesFecha[2]);
@@ -393,7 +393,7 @@ public class ControladorSistema implements Serializable {
     int minutos = Integer.parseInt(partesHora[1]);
 
     // Crear LocalDate y LocalTime
-    LocalDate fechaServicio = LocalDate.of(anio, mes, dia);
+    LocalDate fechaServicio = LocalDate.of(dia, mes, anio);
     LocalTime horaServicio = LocalTime.of(horas, minutos);
 
     // Crear y agregar servicio

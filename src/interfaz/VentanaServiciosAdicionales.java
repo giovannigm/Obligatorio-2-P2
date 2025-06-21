@@ -38,7 +38,7 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
   private void initComponents() {
     setLayout(new BorderLayout());
 
-    // Filtro para fecha (yyyy-MM-dd)
+    // Filtro para fecha (dd-MM-yyyy)
     DocumentFilter fechaFilter = new DocumentFilter() {
       @Override
       public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
@@ -126,10 +126,10 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     // Fecha
     gbc.gridx = 0;
     gbc.gridy = 1;
-    lblFecha = new JLabel("Fecha (yyyy-MM-dd):");
+    lblFecha = new JLabel("Fecha (DD-MM-YYYY):");
     panelFormulario.add(lblFecha, gbc);
     gbc.gridx = 1;
-    txtFecha = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), 15);
+    txtFecha = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")), 15);
     ((AbstractDocument) txtFecha.getDocument()).setDocumentFilter(fechaFilter);
     panelFormulario.add(txtFecha, gbc);
 
@@ -237,7 +237,7 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
   private void actualizarTabla() {
     modelo.setRowCount(0);
     ArrayList<ServicioAdicional> servicios = controlador.getServiciosAdicionales();
-    DateTimeFormatter formatterFecha = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    DateTimeFormatter formatterFecha = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     DateTimeFormatter formatterHora = DateTimeFormatter.ofPattern("HH:mm");
 
     for (ServicioAdicional servicio : servicios) {
@@ -257,11 +257,15 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     try {
       // Capturar datos del formulario
       String tipo = (String) cmbTipoServicio.getSelectedItem();
-      String fecha = txtFecha.getText().trim();
+      String fechaInput = txtFecha.getText().trim();
       String hora = txtHora.getText().trim();
       Vehiculo vehiculo = (Vehiculo) cmbVehiculos.getSelectedItem();
       Empleado empleado = (Empleado) cmbEmpleados.getSelectedItem();
       String costo = txtCosto.getText().trim();
+
+      // Validar fecha DD-MM-YYYY
+      // LocalDate.parse(fechaInput, DateTimeFormatter.ofPattern("dd-MM-yyyy")); // Solo validación
+      String fecha = fechaInput;
 
       // Delegar la lógica al controlador
       controlador.agregarServicioAdicional(tipo, fecha, hora, vehiculo, empleado, costo);
@@ -270,10 +274,10 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
       actualizarTabla();
       limpiarCampos();
       // Restablecer fecha y hora actuales
-      txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+      txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
       txtHora.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
       mostrarExito("Servicio adicional agregado exitosamente");
-    } catch (IllegalArgumentException e) {
+    } catch (Exception e) {
       mostrarError(e.getMessage());
     }
   }

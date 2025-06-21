@@ -51,9 +51,9 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         // Fecha
         gbc.gridx = 0;
         gbc.gridy = 2;
-        panelForm.add(new JLabel("Fecha (YYYY-MM-DD):"), gbc);
+        panelForm.add(new JLabel("Fecha (DD-MM-YYYY):"), gbc);
         gbc.gridx = 1;
-        txtFecha = new JTextField(LocalDate.now().toString(), 10);
+        txtFecha = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")), 10);
         txtFecha.setPreferredSize(new Dimension(200, 25));
         panelForm.add(txtFecha, gbc);
 
@@ -144,7 +144,8 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
 
         }
         try {
-            LocalDate fecha = LocalDate.parse(fechaStr);
+            // Convertir de DD-MM-YYYY a LocalDate
+            LocalDate fecha = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
             LocalTime hora = LocalTime.parse(horaStr);
             if (fecha.isBefore(entrada.getFecha())
                     || (fecha.isEqual(entrada.getFecha()) && hora.isBefore(entrada.getHora()))) {
@@ -162,7 +163,7 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
             cargarEntradasSinSalida();
             txtComentario.setText("");
         } catch (java.time.format.DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "Error en formato de fecha u hora. Use YYYY-MM-DD y HH:MM. 24Hs",
+            JOptionPane.showMessageDialog(this, "Error en formato de fecha u hora. Use DD-MM-YYYY y HH:MM. 24Hs",
                     "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
