@@ -4,8 +4,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.*;
 import java.awt.*;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
@@ -40,13 +38,13 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
   private void initComponents() {
     setLayout(new BorderLayout());
 
-    // Filtro para fecha (dd/MM/yyyy)
+    // Filtro para fecha (dd-MM-yyyy)
     DocumentFilter fechaFilter = new DocumentFilter() {
       @Override
       public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
           throws BadLocationException {
         String nuevoTexto = fb.getDocument().getText(0, fb.getDocument().getLength()) + string;
-        if (nuevoTexto.length() <= 10 && string.matches("[0-9/]*")) {
+        if (nuevoTexto.length() <= 10 && string.matches("[0-9-]*")) {
           super.insertString(fb, offset, string, attr);
         }
       }
@@ -57,7 +55,7 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
         String actual = fb.getDocument().getText(0, fb.getDocument().getLength());
         StringBuilder sb = new StringBuilder(actual);
         sb.replace(offset, offset + length, text);
-        if (sb.length() <= 10 && text.matches("[0-9/]*")) {
+        if (sb.length() <= 10 && text.matches("[0-9-]*")) {
           super.replace(fb, offset, length, text, attrs);
         }
       }
@@ -128,10 +126,10 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     // Fecha
     gbc.gridx = 0;
     gbc.gridy = 1;
-    lblFecha = new JLabel("Fecha (dd/MM/yyyy):");
+    lblFecha = new JLabel("Fecha (DD-MM-YYYY):");
     panelFormulario.add(lblFecha, gbc);
     gbc.gridx = 1;
-    txtFecha = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), 15);
+    txtFecha = new JTextField(ControladorSistema.getFechaActual(), 15);
     ((AbstractDocument) txtFecha.getDocument()).setDocumentFilter(fechaFilter);
     panelFormulario.add(txtFecha, gbc);
 
@@ -141,7 +139,7 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     lblHora = new JLabel("Hora (HH:mm):");
     panelFormulario.add(lblHora, gbc);
     gbc.gridx = 1;
-    txtHora = new JTextField(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")), 15);
+    txtHora = new JTextField(ControladorSistema.getHoraActual(), 15);
     ((AbstractDocument) txtHora.getDocument()).setDocumentFilter(horaFilter);
     panelFormulario.add(txtHora, gbc);
 
@@ -239,7 +237,7 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
   private void actualizarTabla() {
     modelo.setRowCount(0);
     ArrayList<ServicioAdicional> servicios = controlador.getServiciosAdicionales();
-    DateTimeFormatter formatterFecha = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    DateTimeFormatter formatterFecha = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     DateTimeFormatter formatterHora = DateTimeFormatter.ofPattern("HH:mm");
 
     for (ServicioAdicional servicio : servicios) {
@@ -259,23 +257,23 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     try {
       // Capturar datos del formulario
       String tipo = (String) cmbTipoServicio.getSelectedItem();
-      String fecha = txtFecha.getText().trim();
+      String fechaInput = txtFecha.getText().trim();
       String hora = txtHora.getText().trim();
       Vehiculo vehiculo = (Vehiculo) cmbVehiculos.getSelectedItem();
       Empleado empleado = (Empleado) cmbEmpleados.getSelectedItem();
       String costo = txtCosto.getText().trim();
 
       // Delegar la lógica al controlador
-      controlador.agregarServicioAdicional(tipo, fecha, hora, vehiculo, empleado, costo);
+      controlador.agregarServicioAdicional(tipo, fechaInput, hora, vehiculo, empleado, costo);
 
       // Actualizar interfaz
       actualizarTabla();
       limpiarCampos();
       // Restablecer fecha y hora actuales
-      txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-      txtHora.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+      txtFecha.setText(ControladorSistema.getFechaActual());
+      txtHora.setText(ControladorSistema.getHoraActual());
       mostrarExito("Servicio adicional agregado exitosamente");
-    } catch (IllegalArgumentException e) {
+    } catch (Exception e) {
       mostrarError(e.getMessage());
     }
   }
@@ -304,7 +302,13 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     cmbTipoServicio.setSelectedItem(tipo);
     txtFecha.setText(fecha);
     txtHora.setText(hora);
-    txtCosto.setText(costo);
+    // Asegurarse de que el costo se muestre correctamente (reemplazar coma por
+    // punto si es necesario)
+    if (costo != null) {
+      txtCosto.setText(costo.replace(",", ".").replaceAll("[^0-9.]", ""));
+    } else {
+      txtCosto.setText("");
+    }
 
     // Seleccionar vehículo y empleado correspondientes
     for (int i = 0; i < cmbVehiculos.getItemCount(); i++) {

@@ -33,6 +33,7 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
   private JButton[][] botonesMovimientos;
   private LocalDate fechaSeleccionada;
   private JPanel panelTitulosColumnas;
+  private static final int ALTURA_MAX_TABLA_ESTADISTICA = 250;
 
   public VentanaReportes(ControladorSistema controlador, boolean modoOscuro) {
     this.controlador = controlador;
@@ -47,7 +48,7 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
 
   private void configurarVentana() {
     setTitle("Reportes del Sistema");
-    setSize(900, 600);
+    setSize(900, 500);
     setLocationRelativeTo(null);
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     setResizable(true);
@@ -287,8 +288,11 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     panelServicios.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10)); // Margen derecho
     JLabel lblServicios = new JLabel("Servicios adicionales más utilizados:", SwingConstants.CENTER);
     JTable tablaServicios = crearTablaServiciosMasUtilizados();
+    JScrollPane scrollServicios = new JScrollPane(tablaServicios);
+    scrollServicios
+        .setPreferredSize(new Dimension(scrollServicios.getPreferredSize().width, ALTURA_MAX_TABLA_ESTADISTICA));
     panelServicios.add(lblServicios, BorderLayout.NORTH);
-    panelServicios.add(new JScrollPane(tablaServicios), BorderLayout.CENTER);
+    panelServicios.add(scrollServicios, BorderLayout.CENTER);
     panelFila1.add(panelServicios);
 
     // Empleados con menor cantidad de movimientos
@@ -296,8 +300,11 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     panelEmpleados.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10)); // Margen a ambos lados
     JLabel lblEmpleados = new JLabel("Empleados con menor cantidad de movimientos:", SwingConstants.CENTER);
     JTable tablaEmpleados = crearTablaEmpleadosMenosMovimientos();
+    JScrollPane scrollEmpleados = new JScrollPane(tablaEmpleados);
+    scrollEmpleados
+        .setPreferredSize(new Dimension(scrollEmpleados.getPreferredSize().width, ALTURA_MAX_TABLA_ESTADISTICA));
     panelEmpleados.add(lblEmpleados, BorderLayout.NORTH);
-    panelEmpleados.add(new JScrollPane(tablaEmpleados), BorderLayout.CENTER);
+    panelEmpleados.add(scrollEmpleados, BorderLayout.CENTER);
     panelFila1.add(panelEmpleados);
 
     // Clientes con mayor cantidad de vehículos
@@ -305,8 +312,11 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     panelClientes.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0)); // Margen izquierdo
     JLabel lblClientes = new JLabel("Clientes con mayor cantidad de vehículos:", SwingConstants.CENTER);
     JTable tablaClientes = crearTablaClientesMasVehiculos();
+    JScrollPane scrollClientes = new JScrollPane(tablaClientes);
+    scrollClientes
+        .setPreferredSize(new Dimension(scrollClientes.getPreferredSize().width, ALTURA_MAX_TABLA_ESTADISTICA));
     panelClientes.add(lblClientes, BorderLayout.NORTH);
-    panelClientes.add(new JScrollPane(tablaClientes), BorderLayout.CENTER);
+    panelClientes.add(scrollClientes, BorderLayout.CENTER);
     panelFila1.add(panelClientes);
 
     // Panel inferior con estadías más largas
@@ -328,20 +338,9 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     String[] columnas = { "Tipo de Servicio", "Cantidad" };
     DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
 
-    for (Object[] fila : datos) {
-      modelo.addRow(fila);
-    }
-
-    return new JTable(modelo);
-  }
-
-  private JTable crearTablaEstadiasMasLargas() {
-    ArrayList<Object[]> datos = controlador.obtenerEstadiasMasLargas();
-    String[] columnas = { "Vehículo", "Duración (min)" };
-    DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
-
-    for (Object[] fila : datos) {
-      modelo.addRow(fila);
+    int limite = Math.min(datos.size(), 5);
+    for (int i = 0; i < limite; i++) {
+      modelo.addRow(datos.get(i));
     }
 
     return new JTable(modelo);
@@ -352,8 +351,9 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     String[] columnas = { "Empleado (Nombre - Cédula)", "Movimientos" };
     DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
 
-    for (Object[] fila : datos) {
-      modelo.addRow(fila);
+    int limite = Math.min(datos.size(), 5);
+    for (int i = 0; i < limite; i++) {
+      modelo.addRow(datos.get(i));
     }
 
     return new JTable(modelo);
@@ -362,6 +362,19 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
   private JTable crearTablaClientesMasVehiculos() {
     ArrayList<Object[]> datos = controlador.obtenerClientesMasVehiculos();
     String[] columnas = { "Cliente", "Cantidad de Vehículos" };
+    DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
+
+    int limite = Math.min(datos.size(), 5);
+    for (int i = 0; i < limite; i++) {
+      modelo.addRow(datos.get(i));
+    }
+
+    return new JTable(modelo);
+  }
+
+  private JTable crearTablaEstadiasMasLargas() {
+    ArrayList<Object[]> datos = controlador.obtenerEstadiasMasLargas();
+    String[] columnas = { "Vehículo", "Duración (min)" };
     DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
 
     for (Object[] fila : datos) {

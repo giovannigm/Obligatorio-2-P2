@@ -3,6 +3,8 @@
 import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.io.Serializable;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,6 +25,10 @@ public class ControladorSistema implements Serializable {
   private transient ArrayList<ReportesObserver> reportesObservers = new ArrayList<>();
   private transient ArrayList<ContratosObserver> contratosObservers = new ArrayList<>();
 
+  // Constantes para formatos de fecha
+  private static final String FORMATO_FECHA_DD_MM_YYYY = "dd-MM-yyyy";
+  private static final String FORMATO_HORA_HH_MM = "HH:mm";
+
   public ControladorSistema() {
     this.clientes = new ArrayList<>();
     this.vehiculos = new ArrayList<>();
@@ -34,6 +40,80 @@ public class ControladorSistema implements Serializable {
 
     // Inicializar datos de ejemplo
     inicializarDatosEjemplo();
+  }
+
+  // ========== MÉTODOS DE VALIDACIÓN DE FECHAS Y HORAS ==========
+
+  /**
+   * Valida y parsea una fecha en formato dd-MM-yyyy
+   * 
+   * @param fecha String con la fecha en formato dd-MM-yyyy
+   * @return LocalDate parseada
+   * @throws IllegalArgumentException si el formato es inválido o la fecha no es
+   *                                  válida
+   */
+  public static LocalDate parsearFecha(String fecha) {
+    if (fecha == null || fecha.trim().isEmpty()) {
+      throw new IllegalArgumentException("La fecha es obligatoria");
+    }
+
+    try {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMATO_FECHA_DD_MM_YYYY);
+      return LocalDate.parse(fecha.trim(), formatter);
+    } catch (DateTimeParseException e) {
+      throw new IllegalArgumentException("Formato de fecha inválido. Use dd-MM-yyyy");
+    }
+  }
+
+  /**
+   * Valida y parsea una hora en formato HH:mm
+   * 
+   * @param hora String con la hora en formato HH:mm
+   * @return LocalTime parseada
+   * @throws IllegalArgumentException si el formato es inválido o la hora no es
+   *                                  válida
+   */
+  public static LocalTime parsearHora(String hora) {
+    if (hora == null || hora.trim().isEmpty()) {
+      throw new IllegalArgumentException("La hora es obligatoria");
+    }
+
+    try {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMATO_HORA_HH_MM);
+      return LocalTime.parse(hora.trim(), formatter);
+    } catch (DateTimeParseException e) {
+      throw new IllegalArgumentException("Formato de hora inválido. Use HH:mm");
+    }
+  }
+
+  /**
+   * Valida que una fecha esté dentro de un rango razonable (1900-2100)
+   * 
+   * @param fecha LocalDate a validar
+   * @throws IllegalArgumentException si la fecha está fuera del rango
+   */
+  public static void validarRangoFecha(LocalDate fecha) {
+    if (fecha.getYear() < 1900 || fecha.getYear() > 2100) {
+      throw new IllegalArgumentException("La fecha debe estar entre 1900 y 2100");
+    }
+  }
+
+  /**
+   * Obtiene la fecha actual en formato dd-MM-yyyy
+   * 
+   * @return String con la fecha actual
+   */
+  public static String getFechaActual() {
+    return LocalDate.now().format(DateTimeFormatter.ofPattern(FORMATO_FECHA_DD_MM_YYYY));
+  }
+
+  /**
+   * Obtiene la hora actual en formato HH:mm
+   * 
+   * @return String con la hora actual
+   */
+  public static String getHoraActual() {
+    return LocalTime.now().format(DateTimeFormatter.ofPattern(FORMATO_HORA_HH_MM));
   }
 
   // ========== MÉTODOS DE VALIDACIÓN ==========
@@ -149,12 +229,6 @@ public class ControladorSistema implements Serializable {
     if (tipo == null || tipo.trim().isEmpty()) {
       throw new IllegalArgumentException("Debe seleccionar un tipo de servicio");
     }
-    if (fecha == null || fecha.trim().isEmpty()) {
-      throw new IllegalArgumentException("La fecha es obligatoria");
-    }
-    if (hora == null || hora.trim().isEmpty()) {
-      throw new IllegalArgumentException("La hora es obligatoria");
-    }
     if (vehiculo == null) {
       throw new IllegalArgumentException("Debe seleccionar un vehículo");
     }
@@ -165,38 +239,11 @@ public class ControladorSistema implements Serializable {
       throw new IllegalArgumentException("El costo es obligatorio");
     }
 
-    // Validar formato de fecha (dd/MM/yyyy)
-    try {
-      String[] partesFecha = fecha.trim().split("/");
-      if (partesFecha.length != 3) {
-        throw new IllegalArgumentException("Formato de fecha inválido. Use dd/MM/yyyy");
-      }
-      int dia = Integer.parseInt(partesFecha[0]);
-      int mes = Integer.parseInt(partesFecha[1]);
-      int anio = Integer.parseInt(partesFecha[2]);
+    // Validar y parsear fecha usando el método centralizado
+    LocalDate fechaServicio = parsearFecha(fecha);
+    validarRangoFecha(fechaServicio);
 
-      if (dia < 1 || dia > 31 || mes < 1 || mes > 12 || anio < 1900 || anio > 2100) {
-        throw new IllegalArgumentException("Fecha inválida");
-      }
-    } catch (NumberFormatException e) {
-      throw new IllegalArgumentException("Formato de fecha inválido. Use dd/MM/yyyy");
-    }
-
-    // Validar formato de hora (HH:mm)
-    try {
-      String[] partesHora = hora.trim().split(":");
-      if (partesHora.length != 2) {
-        throw new IllegalArgumentException("Formato de hora inválido. Use HH:mm");
-      }
-      int horas = Integer.parseInt(partesHora[0]);
-      int minutos = Integer.parseInt(partesHora[1]);
-
-      if (horas < 0 || horas > 23 || minutos < 0 || minutos > 59) {
-        throw new IllegalArgumentException("Hora inválida");
-      }
-    } catch (NumberFormatException e) {
-      throw new IllegalArgumentException("Formato de hora inválido. Use HH:mm");
-    }
+    parsearHora(hora);
 
     // Validar costo
     try {
@@ -384,19 +431,9 @@ public class ControladorSistema implements Serializable {
     // Validar campos
     validarCamposServicioAdicional(tipo, fecha, hora, vehiculo, empleado, costo);
 
-    // Parsear fecha y hora
-    String[] partesFecha = fecha.trim().split("/");
-    int dia = Integer.parseInt(partesFecha[0]);
-    int mes = Integer.parseInt(partesFecha[1]);
-    int anio = Integer.parseInt(partesFecha[2]);
-
-    String[] partesHora = hora.trim().split(":");
-    int horas = Integer.parseInt(partesHora[0]);
-    int minutos = Integer.parseInt(partesHora[1]);
-
-    // Crear LocalDate y LocalTime
-    LocalDate fechaServicio = LocalDate.of(anio, mes, dia);
-    LocalTime horaServicio = LocalTime.of(horas, minutos);
+    // Parsear fecha y hora usando los métodos centralizados
+    LocalDate fechaServicio = parsearFecha(fecha);
+    LocalTime horaServicio = parsearHora(hora);
 
     // Crear y agregar servicio
     double valorCosto = Double.parseDouble(costo.trim());
@@ -454,6 +491,10 @@ public class ControladorSistema implements Serializable {
 
   public void agregarSalida(Salida salida) {
     salidas.add(salida);
+    // Actualizar el estado del vehículo para que vuelva a estar fuera del parking
+    if (salida != null && salida.getEntrada() != null && salida.getEntrada().getVehiculo() != null) {
+      salida.getEntrada().getVehiculo().setDentroParking(false);
+    }
     notificarReportesObservers();
   }
 
@@ -562,9 +603,9 @@ public class ControladorSistema implements Serializable {
     if (vehiculo.isDentroParking()) {
       throw new IllegalArgumentException("El vehículo ya está dentro del parking.");
     }
-    // Parsear fecha y hora
-    LocalDate fechaEntrada = LocalDate.parse(fecha); // formato YYYY-MM-DD
-    LocalTime horaEntrada = LocalTime.parse(hora); // formato HH:MM
+    // Parsear fecha y hora usando los métodos centralizados
+    LocalDate fechaEntrada = parsearFecha(fecha); // formato dd-MM-yyyy
+    LocalTime horaEntrada = parsearHora(hora); // formato HH:MM
     boolean tieneContrato = tieneContrato(vehiculo);
     Entrada entrada = new Entrada(vehiculo, fechaEntrada, horaEntrada, notas, empleado, tieneContrato);
     vehiculo.setDentroParking(true);
@@ -901,5 +942,14 @@ public class ControladorSistema implements Serializable {
       }
     }
     return libres;
+  }
+
+  // Método para inicializar campos transient después de la deserialización
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+    if (reportesObservers == null)
+      reportesObservers = new ArrayList<>();
+    if (contratosObservers == null)
+      contratosObservers = new ArrayList<>();
   }
 }
