@@ -3,7 +3,6 @@
 import javax.swing.*;
 import java.awt.*;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class VentanaSalida extends JPanel implements ModoOscuroObserver {
@@ -53,9 +52,9 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         // Fecha
         gbc.gridx = 0;
         gbc.gridy = 2;
-        panelForm.add(new JLabel("Fecha (YYYY-MM-DD):"), gbc);
+        panelForm.add(new JLabel("Fecha (DD-MM-YYYY):"), gbc);
         gbc.gridx = 1;
-        txtFecha = new JTextField(LocalDate.now().toString(), 10);
+        txtFecha = new JTextField(ControladorSistema.getFechaActual(), 10);
         txtFecha.setPreferredSize(new Dimension(200, 25));
         panelForm.add(txtFecha, gbc);
 
@@ -64,7 +63,7 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         gbc.gridy = 3;
         panelForm.add(new JLabel("Hora (HH:MM, 24hs):"), gbc);
         gbc.gridx = 1;
-        txtHora = new JTextField(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")), 5);
+        txtHora = new JTextField(ControladorSistema.getHoraActual(), 5);
         txtHora.setPreferredSize(new Dimension(200, 25));
         panelForm.add(txtHora, gbc);
 
@@ -146,8 +145,9 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
 
         }
         try {
-            LocalDate fecha = LocalDate.parse(fechaStr);
-            LocalTime hora = LocalTime.parse(horaStr);
+            LocalDate fecha = ControladorSistema.parsearFecha(fechaStr);
+            LocalTime hora = ControladorSistema.parsearHora(horaStr);
+
             if (fecha.isBefore(entrada.getFecha())
                     || (fecha.isEqual(entrada.getFecha()) && hora.isBefore(entrada.getHora()))) {
                 Estilos.mostrarError(lblEstado, "La salida debe ser posterior a la entrada.");
@@ -164,7 +164,7 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
             cargarEntradasSinSalida();
             txtComentario.setText("");
         } catch (java.time.format.DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "Error en formato de fecha u hora. Use YYYY-MM-DD y HH:MM. 24Hs",
+            JOptionPane.showMessageDialog(this, "Error en formato de fecha u hora. Use DD-MM-YYYY y HH:MM. 24Hs",
                     "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
