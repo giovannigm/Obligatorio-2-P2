@@ -37,9 +37,6 @@ public class ControladorSistema implements Serializable {
     this.entradas = new ArrayList<>();
     this.salidas = new ArrayList<>();
     this.servicios = new ArrayList<>();
-
-    // Inicializar datos de ejemplo
-    inicializarDatosEjemplo();
   }
 
   // ========== MÉTODOS DE VALIDACIÓN DE FECHAS Y HORAS ==========
@@ -445,46 +442,6 @@ public class ControladorSistema implements Serializable {
 
   public ArrayList<ServicioAdicional> getServiciosAdicionales() {
     return new ArrayList<>(servicios);
-  }
-
-  // ========== MÉTODO DE INICIALIZACIÓN ==========
-
-  private void inicializarDatosEjemplo() {
-    // Agregar clientes de ejemplo
-    try {
-      agregarCliente("Juan Pérez", "12345678", "Av. 18 de Julio 1234", "099123456", "2020");
-      agregarCliente("María García", "87654321", "Bulevar Artigas 567", "098765432", "2021");
-      agregarCliente("Carlos López", "11223344", "Rambla República 890", "097112233", "2019");
-      agregarCliente("Ana Rodríguez", "55667788", "Av. Italia 2345", "096556677", "2022");
-      agregarCliente("Luis Martínez", "99887766", "Av. Garzón 678", "095998877", "2023");
-    } catch (Exception e) {
-      // Ignorar errores en datos de ejemplo
-    }
-
-    // Agregar vehículos de ejemplo
-    try {
-      agregarVehiculo("ABC1234", "Toyota", "Corolla", "Bueno");
-      agregarVehiculo("XYZ5678", "Honda", "Civic", "Bueno");
-      agregarVehiculo("DEF9012", "Ford", "Focus", "Bueno");
-      agregarVehiculo("GHI3456", "Chevrolet", "Cruze", "Bueno");
-      agregarVehiculo("JKL7890", "Volkswagen", "Golf", "Bueno");
-      agregarVehiculo("MNO1234", "Nissan", "Sentra", "Bueno");
-      agregarVehiculo("PQR5678", "Hyundai", "Elantra", "Bueno");
-      agregarVehiculo("STU9012", "Kia", "Rio", "Bueno");
-    } catch (Exception e) {
-      // Ignorar errores en datos de ejemplo
-    }
-
-    // Agregar empleados de ejemplo
-    try {
-      agregarEmpleado("Roberto Silva", "11111111", "Av. Centenario 123");
-      agregarEmpleado("Carmen Fernández", "22222222", "Bulevar España 456");
-      agregarEmpleado("Miguel Torres", "33333333", "Av. Rivera 789");
-      agregarEmpleado("Elena Morales", "44444444", "Rambla Wilson 012");
-      agregarEmpleado("Diego Herrera", "55555555", "Av. Agraciada 345");
-    } catch (Exception e) {
-      // Ignorar errores en datos de ejemplo
-    }
   }
 
   // ========== MÉTODOS DE SALIDA ==========
