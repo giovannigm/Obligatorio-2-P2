@@ -454,7 +454,7 @@ public class ControladorSistema implements Serializable {
     salidas.add(salida);
     // Actualizar el estado del vehículo para que vuelva a estar fuera del parking
     if (salida != null && salida.getEntrada() != null && salida.getEntrada().getVehiculo() != null) {
-        salida.getEntrada().getVehiculo().setDentroParking(false);
+      salida.getEntrada().getVehiculo().setDentroParking(false);
     }
     notificarReportesObservers();
   }
@@ -903,5 +903,14 @@ public class ControladorSistema implements Serializable {
       }
     }
     return libres;
+  }
+
+  // Método para inicializar campos transient después de la deserialización
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+    if (reportesObservers == null)
+      reportesObservers = new ArrayList<>();
+    if (contratosObservers == null)
+      contratosObservers = new ArrayList<>();
   }
 }
