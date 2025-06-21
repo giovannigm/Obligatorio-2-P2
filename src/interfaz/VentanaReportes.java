@@ -44,6 +44,11 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     crearComponentes();
     configurarEventos();
     aplicarEstilos();
+
+    // Actualizar la grilla después de que todos los componentes estén creados
+    if (panelMovimientos != null) {
+      actualizarGrillaMovimientos();
+    }
   }
 
   private void configurarVentana() {
@@ -397,7 +402,9 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     spinnerFecha = new JSpinner(model);
     JSpinner.DateEditor editor = new JSpinner.DateEditor(spinnerFecha, "dd/MM/yyyy");
     spinnerFecha.setEditor(editor);
-    spinnerFecha.setValue(new Date()); // Fecha actual
+    // Inicializar con la fecha seleccionada
+    Date initialDate = Date.from(fechaSeleccionada.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    spinnerFecha.setValue(initialDate);
 
     panelSuperior.add(lblFecha);
     panelSuperior.add(spinnerFecha);
@@ -458,9 +465,6 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     panel.add(panelSuperior, BorderLayout.NORTH);
     panel.add(panelGrillaCompleta, BorderLayout.CENTER);
     panel.add(panelLeyenda, BorderLayout.SOUTH);
-
-    // Actualizar la grilla inicial
-    actualizarGrillaMovimientos();
 
     return panel;
   }
