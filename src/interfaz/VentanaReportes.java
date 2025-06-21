@@ -6,7 +6,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.time.ZoneId;
 
 public class VentanaReportes extends JFrame implements ModoOscuroObserver, ReportesObserver {
   private ControladorSistema controlador;
@@ -22,9 +27,16 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
   private JButton btnExportar;
   private JLabel lblEstado;
 
+  // Componentes de la pestaña Grilla de Movimientos
+  private JSpinner spinnerFecha;
+  private JPanel panelMovimientos;
+  private JButton[][] botonesMovimientos;
+  private LocalDate fechaSeleccionada;
+
   public VentanaReportes(ControladorSistema controlador, boolean modoOscuro) {
     this.controlador = controlador;
     this.modoOscuro = modoOscuro;
+    this.fechaSeleccionada = LocalDate.now();
     this.controlador.addReportesObserver(this);
     configurarVentana();
     crearComponentes();
@@ -45,9 +57,8 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     JPanel panelHistorial = crearPanelHistorialVehiculo();
     tabbedPane.addTab("Historial", panelHistorial);
 
-    JPanel panelMovimiento = new JPanel();
-    panelMovimiento.add(new JLabel("Panel de Movimiento (en desarrollo)"));
-    tabbedPane.addTab("Movimiento", panelMovimiento);
+    JPanel panelGrillaMovimientos = crearPanelGrillaMovimientos();
+    tabbedPane.addTab("Grilla de movimientos", panelGrillaMovimientos);
 
     JPanel panelEstadisticas = crearPanelEstadisticasGenerales();
     tabbedPane.addTab("Estadísticas Generales", panelEstadisticas);
@@ -147,6 +158,14 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
         exportarATxt();
       }
     });
+
+    // Evento de cambio de fecha en la grilla de movimientos
+    spinnerFecha.addChangeListener(new javax.swing.event.ChangeListener() {
+      @Override
+      public void stateChanged(javax.swing.event.ChangeEvent e) {
+        actualizarGrillaMovimientos();
+      }
+    });
   }
 
   private void actualizarTabla() {
@@ -215,7 +234,15 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
 
   private void aplicarEstilos() {
     Estilos.EstilosReportes.aplicarEstilosReporte(this, modoOscuro);
-    repaint();
+
+    // Aplicar estilos específicos a la grilla de movimientos
+    if (panelMovimientos != null) {
+      Estilos.EstilosReportes.aplicarEstilosReporte(panelMovimientos, modoOscuro);
+    }
+
+    if (spinnerFecha != null) {
+      Estilos.EstilosReportes.aplicarEstilosReporte(spinnerFecha, modoOscuro);
+    }
   }
 
   public void setModoOscuro(boolean modoOscuro) {
@@ -226,16 +253,23 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
   @Override
   public void actualizarModoOscuro(boolean modoOscuro) {
     setModoOscuro(modoOscuro);
+    aplicarEstilos();
+
+    // Actualizar la grilla de movimientos si existe
+    if (panelMovimientos != null) {
+      actualizarGrillaMovimientos();
+    }
   }
 
   @Override
   public void reportesActualizados() {
-    SwingUtilities.invokeLater(() -> {
-      int idx = tabbedPane.indexOfTab("Estadísticas Generales");
-      if (idx != -1) {
-        tabbedPane.setComponentAt(idx, crearPanelEstadisticasGenerales());
-      }
-    });
+    // Actualizar tabla de historial
+    actualizarTabla();
+
+    // Actualizar grilla de movimientos
+    if (panelMovimientos != null) {
+      actualizarGrillaMovimientos();
+    }
   }
 
   private JPanel crearPanelEstadisticasGenerales() {
@@ -334,5 +368,256 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     }
 
     return new JTable(modelo);
+  }
+
+  private JPanel crearPanelGrillaMovimientos() {
+    JPanel panel = new JPanel(new BorderLayout(10, 10));
+    panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+    // Panel superior con selector de fecha
+    JPanel panelSuperior = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+    JLabel lblFecha = new JLabel("Fecha base:");
+
+    // Crear spinner para la fecha
+    SpinnerDateModel model = new SpinnerDateModel();
+    spinnerFecha = new JSpinner(model);
+    JSpinner.DateEditor editor = new JSpinner.DateEditor(spinnerFecha, "dd/MM/yyyy");
+    spinnerFecha.setEditor(editor);
+    spinnerFecha.setValue(new Date()); // Fecha actual
+
+    panelSuperior.add(lblFecha);
+    panelSuperior.add(spinnerFecha);
+
+    // Panel central con la grilla de movimientos
+    panelMovimientos = new JPanel(new GridLayout(4, 3, 5, 5));
+    panelMovimientos.setBorder(BorderFactory.createTitledBorder("Movimientos por bloque horario"));
+
+    // Inicializar array de botones
+    botonesMovimientos = new JButton[4][3];
+
+    // Crear botones dinámicamente
+    for (int fila = 0; fila < 4; fila++) {
+      for (int columna = 0; columna < 3; columna++) {
+        JButton nuevo = new JButton(" ");
+        nuevo.setMargin(new Insets(-5, -5, -5, -5));
+        nuevo.setBackground(Color.BLACK);
+        nuevo.setForeground(Color.WHITE);
+        nuevo.setText("texto"); // completar luego
+        nuevo.addActionListener(new MovListener(fila, columna));
+        panelMovimientos.add(nuevo);
+        botonesMovimientos[fila][columna] = nuevo;
+      }
+    }
+
+    // Panel inferior con leyenda
+    JPanel panelLeyenda = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+    JLabel lblLeyenda = new JLabel("Leyenda: Verde (< 5) | Amarillo (5-8) | Rojo (> 8)");
+    panelLeyenda.add(lblLeyenda);
+
+    panel.add(panelSuperior, BorderLayout.NORTH);
+    panel.add(panelMovimientos, BorderLayout.CENTER);
+    panel.add(panelLeyenda, BorderLayout.SOUTH);
+
+    // Actualizar la grilla inicial
+    actualizarGrillaMovimientos();
+
+    return panel;
+  }
+
+  private void actualizarGrillaMovimientos() {
+    // Obtener la fecha seleccionada del spinner
+    Date fechaSpinner = (Date) spinnerFecha.getValue();
+    fechaSeleccionada = fechaSpinner.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+    // Actualizar cada botón de la grilla
+    for (int fila = 0; fila < 4; fila++) {
+      for (int columna = 0; columna < 3; columna++) {
+        LocalDate fechaBloque = fechaSeleccionada.plusDays(columna);
+        int cantidadMovimientos = contarMovimientosEnBloque(fechaBloque, fila);
+
+        JButton boton = botonesMovimientos[fila][columna];
+        boton.setText(cantidadMovimientos + " movs");
+
+        // Aplicar color según la cantidad
+        if (cantidadMovimientos < 5) {
+          boton.setBackground(Color.GREEN);
+          boton.setForeground(Color.WHITE);
+        } else if (cantidadMovimientos <= 8) {
+          boton.setBackground(Color.YELLOW);
+          boton.setForeground(Color.BLACK);
+        } else {
+          boton.setBackground(Color.RED);
+          boton.setForeground(Color.WHITE);
+        }
+      }
+    }
+  }
+
+  private int contarMovimientosEnBloque(LocalDate fecha, int bloqueHorario) {
+    // Arrays para rangos horarios (más simple que switch)
+    LocalTime[] horasInicio = {
+        LocalTime.of(0, 0), // 0:00-5:59
+        LocalTime.of(6, 0), // 6:00-11:59
+        LocalTime.of(12, 0), // 12:00-17:59
+        LocalTime.of(18, 0) // 18:00-23:59
+    };
+
+    LocalTime[] horasFin = {
+        LocalTime.of(5, 59), // 0:00-5:59
+        LocalTime.of(11, 59), // 6:00-11:59
+        LocalTime.of(17, 59), // 12:00-17:59
+        LocalTime.of(23, 59) // 18:00-23:59
+    };
+
+    if (bloqueHorario < 0 || bloqueHorario >= 4) {
+      return 0;
+    }
+
+    LocalTime horaInicio = horasInicio[bloqueHorario];
+    LocalTime horaFin = horasFin[bloqueHorario];
+    int contador = 0;
+
+    // Contar entradas
+    for (Entrada entrada : controlador.getEntradas()) {
+      if (entrada.getFecha().equals(fecha) &&
+          !entrada.getHora().isBefore(horaInicio) &&
+          !entrada.getHora().isAfter(horaFin)) {
+        contador++;
+      }
+    }
+
+    // Contar salidas
+    for (Salida salida : controlador.getSalidas()) {
+      if (salida.getFecha().equals(fecha) &&
+          !salida.getHora().isBefore(horaInicio) &&
+          !salida.getHora().isAfter(horaFin)) {
+        contador++;
+      }
+    }
+
+    // Contar servicios adicionales
+    for (ServicioAdicional servicio : controlador.getServiciosAdicionales()) {
+      if (servicio.getFecha().equals(fecha) &&
+          !servicio.getHora().isBefore(horaInicio) &&
+          !servicio.getHora().isAfter(horaFin)) {
+        contador++;
+      }
+    }
+
+    return contador;
+  }
+
+  private String obtenerMovimientosEnBloque(LocalDate fecha, int bloqueHorario) {
+    // Arrays para rangos horarios
+    LocalTime[] horasInicio = {
+        LocalTime.of(0, 0), // 0:00-5:59
+        LocalTime.of(6, 0), // 6:00-11:59
+        LocalTime.of(12, 0), // 12:00-17:59
+        LocalTime.of(18, 0) // 18:00-23:59
+    };
+
+    LocalTime[] horasFin = {
+        LocalTime.of(5, 59), // 0:00-5:59
+        LocalTime.of(11, 59), // 6:00-11:59
+        LocalTime.of(17, 59), // 12:00-17:59
+        LocalTime.of(23, 59) // 18:00-23:59
+    };
+
+    if (bloqueHorario < 0 || bloqueHorario >= 4) {
+      return "No hay movimientos registrados en este bloque horario.";
+    }
+
+    LocalTime horaInicio = horasInicio[bloqueHorario];
+    LocalTime horaFin = horasFin[bloqueHorario];
+
+    ArrayList<String> movimientos = new ArrayList<>();
+
+    // Obtener entradas
+    for (Entrada entrada : controlador.getEntradas()) {
+      if (entrada.getFecha().equals(fecha) &&
+          !entrada.getHora().isBefore(horaInicio) &&
+          !entrada.getHora().isAfter(horaFin)) {
+        String movimiento = String.format("%s %s - %s - Entrada",
+            entrada.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+            entrada.getHora().format(DateTimeFormatter.ofPattern("HH:mm")),
+            entrada.getVehiculo().getMatricula());
+        movimientos.add(movimiento);
+      }
+    }
+
+    // Obtener salidas
+    for (Salida salida : controlador.getSalidas()) {
+      if (salida.getFecha().equals(fecha) &&
+          !salida.getHora().isBefore(horaInicio) &&
+          !salida.getHora().isAfter(horaFin)) {
+        String movimiento = String.format("%s %s - %s - Salida",
+            salida.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+            salida.getHora().format(DateTimeFormatter.ofPattern("HH:mm")),
+            salida.getEntrada().getVehiculo().getMatricula());
+        movimientos.add(movimiento);
+      }
+    }
+
+    // Obtener servicios adicionales
+    for (ServicioAdicional servicio : controlador.getServiciosAdicionales()) {
+      if (servicio.getFecha().equals(fecha) &&
+          !servicio.getHora().isBefore(horaInicio) &&
+          !servicio.getHora().isAfter(horaFin)) {
+        String movimiento = String.format("%s %s - %s - Servicio: %s",
+            servicio.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+            servicio.getHora().format(DateTimeFormatter.ofPattern("HH:mm")),
+            servicio.getVehiculo().getMatricula(),
+            servicio.getTipo());
+        movimientos.add(movimiento);
+      }
+    }
+
+    // Ordenar movimientos (orden simple por fecha/hora)
+    movimientos.sort((m1, m2) -> m1.compareTo(m2));
+
+    // Construir resultado
+    if (movimientos.isEmpty()) {
+      return "No hay movimientos registrados en este bloque horario.";
+    }
+
+    StringBuilder resultado = new StringBuilder("Movimientos registrados:\n\n");
+    for (String movimiento : movimientos) {
+      resultado.append(movimiento).append("\n");
+    }
+
+    return resultado.toString();
+  }
+
+  private class MovListener implements ActionListener {
+    private int fila;
+    private int columna;
+
+    public MovListener(int fila, int columna) {
+      this.fila = fila;
+      this.columna = columna;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      // Calcular la fecha del bloque
+      LocalDate fechaBloque = fechaSeleccionada.plusDays(columna);
+
+      // Obtener movimientos del bloque
+      String movimientos = obtenerMovimientosEnBloque(fechaBloque, fila);
+
+      // Mostrar ventana emergente (más simple con JOptionPane)
+      String[] rangosHorarios = { "0:00-5:59", "6:00-11:59", "12:00-17:59", "18:00-23:59" };
+      String rangoHorario = rangosHorarios[fila];
+      String titulo = "Movimientos - " + fechaBloque.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " "
+          + rangoHorario;
+
+      JTextArea areaTexto = new JTextArea(movimientos);
+      areaTexto.setEditable(false);
+      areaTexto.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
+      JScrollPane scrollPane = new JScrollPane(areaTexto);
+      scrollPane.setPreferredSize(new Dimension(500, 300));
+
+      JOptionPane.showMessageDialog(VentanaReportes.this, scrollPane, titulo, JOptionPane.INFORMATION_MESSAGE);
+    }
   }
 }
