@@ -32,6 +32,7 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
   private JPanel panelMovimientos;
   private JButton[][] botonesMovimientos;
   private LocalDate fechaSeleccionada;
+  private JPanel panelTitulosColumnas;
 
   public VentanaReportes(ControladorSistema controlador, boolean modoOscuro) {
     this.controlador = controlador;
@@ -388,9 +389,28 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     panelSuperior.add(lblFecha);
     panelSuperior.add(spinnerFecha);
 
+    // Panel central con la grilla de movimientos (con títulos)
+    JPanel panelGrillaCompleta = new JPanel(new BorderLayout(5, 5));
+    panelGrillaCompleta.setBorder(BorderFactory.createTitledBorder("Movimientos por bloque horario"));
+
+    // Panel de títulos de columnas (fechas)
+    panelTitulosColumnas = new JPanel(new GridLayout(1, 3, 5, 5));
+    panelTitulosColumnas.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 0));
+
+    // Panel de títulos de filas (rangos horarios) y grilla
+    JPanel panelFilaTitulos = new JPanel(new BorderLayout(5, 5));
+
+    // Panel de títulos de filas
+    JPanel panelTitulosFilas = new JPanel(new GridLayout(4, 1, 5, 5));
+    String[] rangosHorarios = { "0:00-5:59", "6:00-11:59", "12:00-17:59", "18:00-23:59" };
+    for (String rango : rangosHorarios) {
+      JLabel lblRango = new JLabel(rango, SwingConstants.RIGHT);
+      lblRango.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+      panelTitulosFilas.add(lblRango);
+    }
+
     // Panel central con la grilla de movimientos
     panelMovimientos = new JPanel(new GridLayout(4, 3, 5, 5));
-    panelMovimientos.setBorder(BorderFactory.createTitledBorder("Movimientos por bloque horario"));
 
     // Inicializar array de botones
     botonesMovimientos = new JButton[4][3];
@@ -409,13 +429,21 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
       }
     }
 
+    // Agregar componentes al panel de fila de títulos
+    panelFilaTitulos.add(panelTitulosFilas, BorderLayout.WEST);
+    panelFilaTitulos.add(panelMovimientos, BorderLayout.CENTER);
+
+    // Agregar todo al panel de grilla completa
+    panelGrillaCompleta.add(panelTitulosColumnas, BorderLayout.NORTH);
+    panelGrillaCompleta.add(panelFilaTitulos, BorderLayout.CENTER);
+
     // Panel inferior con leyenda
     JPanel panelLeyenda = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
     JLabel lblLeyenda = new JLabel("Leyenda: Verde (< 5) | Amarillo (5-8) | Rojo (> 8)");
     panelLeyenda.add(lblLeyenda);
 
     panel.add(panelSuperior, BorderLayout.NORTH);
-    panel.add(panelMovimientos, BorderLayout.CENTER);
+    panel.add(panelGrillaCompleta, BorderLayout.CENTER);
     panel.add(panelLeyenda, BorderLayout.SOUTH);
 
     // Actualizar la grilla inicial
@@ -428,6 +456,9 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     // Obtener la fecha seleccionada del spinner
     Date fechaSpinner = (Date) spinnerFecha.getValue();
     fechaSeleccionada = fechaSpinner.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+    // Actualizar títulos de columnas (fechas)
+    actualizarTitulosColumnas();
 
     // Actualizar cada botón de la grilla
     for (int fila = 0; fila < 4; fila++) {
@@ -451,6 +482,25 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
         }
       }
     }
+  }
+
+  private void actualizarTitulosColumnas() {
+    // Limpiar y agregar nuevos títulos
+    panelTitulosColumnas.removeAll();
+
+    String[] nombresDias = { "Hoy", "Mañana", "Pasado mañana" };
+    for (int i = 0; i < 3; i++) {
+      LocalDate fechaColumna = fechaSeleccionada.plusDays(i);
+      String tituloColumna = nombresDias[i] + "\n" + fechaColumna.format(DateTimeFormatter.ofPattern("dd/MM"));
+
+      JLabel lblFecha = new JLabel(tituloColumna, SwingConstants.CENTER);
+      lblFecha.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      panelTitulosColumnas.add(lblFecha);
+    }
+
+    // Refrescar el panel
+    panelTitulosColumnas.revalidate();
+    panelTitulosColumnas.repaint();
   }
 
   private int contarMovimientosEnBloque(LocalDate fecha, int bloqueHorario) {
