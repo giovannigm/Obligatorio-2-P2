@@ -393,7 +393,7 @@ public class ControladorSistema implements Serializable {
     int minutos = Integer.parseInt(partesHora[1]);
 
     // Crear LocalDate y LocalTime
-    LocalDate fechaServicio = LocalDate.of(dia, mes, anio);
+    LocalDate fechaServicio = LocalDate.of(anio, mes, dia);
     LocalTime horaServicio = LocalTime.of(horas, minutos);
 
     // Crear y agregar servicio

@@ -263,12 +263,8 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
       Empleado empleado = (Empleado) cmbEmpleados.getSelectedItem();
       String costo = txtCosto.getText().trim();
 
-      // Validar fecha DD-MM-YYYY
-      // LocalDate.parse(fechaInput, DateTimeFormatter.ofPattern("dd-MM-yyyy")); // Solo validación
-      String fecha = fechaInput;
-
       // Delegar la lógica al controlador
-      controlador.agregarServicioAdicional(tipo, fecha, hora, vehiculo, empleado, costo);
+      controlador.agregarServicioAdicional(tipo, fechaInput, hora, vehiculo, empleado, costo);
 
       // Actualizar interfaz
       actualizarTabla();
