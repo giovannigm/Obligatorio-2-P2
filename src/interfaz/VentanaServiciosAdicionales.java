@@ -2,8 +2,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.*;
 import java.awt.*;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
@@ -129,7 +127,7 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     lblFecha = new JLabel("Fecha (DD-MM-YYYY):");
     panelFormulario.add(lblFecha, gbc);
     gbc.gridx = 1;
-    txtFecha = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")), 15);
+    txtFecha = new JTextField(ControladorSistema.getFechaActual(), 15);
     ((AbstractDocument) txtFecha.getDocument()).setDocumentFilter(fechaFilter);
     panelFormulario.add(txtFecha, gbc);
 
@@ -139,7 +137,7 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
     lblHora = new JLabel("Hora (HH:mm):");
     panelFormulario.add(lblHora, gbc);
     gbc.gridx = 1;
-    txtHora = new JTextField(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")), 15);
+    txtHora = new JTextField(ControladorSistema.getHoraActual(), 15);
     ((AbstractDocument) txtHora.getDocument()).setDocumentFilter(horaFilter);
     panelFormulario.add(txtHora, gbc);
 
@@ -270,8 +268,8 @@ public class VentanaServiciosAdicionales extends JPanel implements ModoOscuroObs
       actualizarTabla();
       limpiarCampos();
       // Restablecer fecha y hora actuales
-      txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-      txtHora.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+      txtFecha.setText(ControladorSistema.getFechaActual());
+      txtHora.setText(ControladorSistema.getHoraActual());
       mostrarExito("Servicio adicional agregado exitosamente");
     } catch (Exception e) {
       mostrarError(e.getMessage());

@@ -253,7 +253,8 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     JLabel lblServicios = new JLabel("Servicios adicionales más utilizados:", SwingConstants.CENTER);
     JTable tablaServicios = crearTablaServiciosMasUtilizados();
     JScrollPane scrollServicios = new JScrollPane(tablaServicios);
-    scrollServicios.setPreferredSize(new Dimension(scrollServicios.getPreferredSize().width, ALTURA_MAX_TABLA_ESTADISTICA));
+    scrollServicios
+        .setPreferredSize(new Dimension(scrollServicios.getPreferredSize().width, ALTURA_MAX_TABLA_ESTADISTICA));
     panelServicios.add(lblServicios, BorderLayout.NORTH);
     panelServicios.add(scrollServicios, BorderLayout.CENTER);
     panelFila1.add(panelServicios);
@@ -264,7 +265,8 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     JLabel lblEmpleados = new JLabel("Empleados con menor cantidad de movimientos:", SwingConstants.CENTER);
     JTable tablaEmpleados = crearTablaEmpleadosMenosMovimientos();
     JScrollPane scrollEmpleados = new JScrollPane(tablaEmpleados);
-    scrollEmpleados.setPreferredSize(new Dimension(scrollEmpleados.getPreferredSize().width, ALTURA_MAX_TABLA_ESTADISTICA));
+    scrollEmpleados
+        .setPreferredSize(new Dimension(scrollEmpleados.getPreferredSize().width, ALTURA_MAX_TABLA_ESTADISTICA));
     panelEmpleados.add(lblEmpleados, BorderLayout.NORTH);
     panelEmpleados.add(scrollEmpleados, BorderLayout.CENTER);
     panelFila1.add(panelEmpleados);
@@ -275,7 +277,8 @@ public class VentanaReportes extends JFrame implements ModoOscuroObserver, Repor
     JLabel lblClientes = new JLabel("Clientes con mayor cantidad de vehículos:", SwingConstants.CENTER);
     JTable tablaClientes = crearTablaClientesMasVehiculos();
     JScrollPane scrollClientes = new JScrollPane(tablaClientes);
-    scrollClientes.setPreferredSize(new Dimension(scrollClientes.getPreferredSize().width, ALTURA_MAX_TABLA_ESTADISTICA));
+    scrollClientes
+        .setPreferredSize(new Dimension(scrollClientes.getPreferredSize().width, ALTURA_MAX_TABLA_ESTADISTICA));
     panelClientes.add(lblClientes, BorderLayout.NORTH);
     panelClientes.add(scrollClientes, BorderLayout.CENTER);
     panelFila1.add(panelClientes);

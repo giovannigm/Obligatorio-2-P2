@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class VentanaSalida extends JPanel implements ModoOscuroObserver {
@@ -53,7 +52,7 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         gbc.gridy = 2;
         panelForm.add(new JLabel("Fecha (DD-MM-YYYY):"), gbc);
         gbc.gridx = 1;
-        txtFecha = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")), 10);
+        txtFecha = new JTextField(ControladorSistema.getFechaActual(), 10);
         txtFecha.setPreferredSize(new Dimension(200, 25));
         panelForm.add(txtFecha, gbc);
 
@@ -62,7 +61,7 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
         gbc.gridy = 3;
         panelForm.add(new JLabel("Hora (HH:MM, 24hs):"), gbc);
         gbc.gridx = 1;
-        txtHora = new JTextField(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")), 5);
+        txtHora = new JTextField(ControladorSistema.getHoraActual(), 5);
         txtHora.setPreferredSize(new Dimension(200, 25));
         panelForm.add(txtHora, gbc);
 
@@ -144,9 +143,9 @@ public class VentanaSalida extends JPanel implements ModoOscuroObserver {
 
         }
         try {
-            // Convertir de DD-MM-YYYY a LocalDate
-            LocalDate fecha = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            LocalTime hora = LocalTime.parse(horaStr);
+            LocalDate fecha = ControladorSistema.parsearFecha(fechaStr);
+            LocalTime hora = ControladorSistema.parsearHora(horaStr);
+
             if (fecha.isBefore(entrada.getFecha())
                     || (fecha.isEqual(entrada.getFecha()) && hora.isBefore(entrada.getHora()))) {
                 Estilos.mostrarError(lblEstado, "La salida debe ser posterior a la entrada.");

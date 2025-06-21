@@ -1,8 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
@@ -54,7 +51,7 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
         gbc.gridy = 2;
         panelForm.add(new JLabel("Fecha (DD-MM-YYYY):"), gbc);
         gbc.gridx = 1;
-        txtFecha = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")), 10);
+        txtFecha = new JTextField(ControladorSistema.getFechaActual(), 10);
         panelForm.add(txtFecha, gbc);
 
         // Hora
@@ -62,7 +59,7 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
         gbc.gridy = 3;
         panelForm.add(new JLabel("Hora (HH:MM):"), gbc);
         gbc.gridx = 1;
-        txtHora = new JTextField(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")), 5);
+        txtHora = new JTextField(ControladorSistema.getHoraActual(), 5);
         panelForm.add(txtHora, gbc);
 
         // Notas
@@ -143,15 +140,12 @@ public class VentanaEntrada extends JPanel implements ModoOscuroObserver {
         Vehiculo vehiculo = controlador.getVehiculosFueraParking().get(idxVehiculo - 1); // Ajuste de índice
         Empleado empleado = controlador.getEmpleados().get(idxEmpleado);
         try {
-            // Convertir de DD-MM-YYYY a YYYY-MM-DD
-            LocalDate fechaDate = LocalDate.parse(fechaInput, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            String fecha = fechaDate.toString();
-            controlador.registrarEntrada(vehiculo, fecha, hora, notas, empleado);
+            controlador.registrarEntrada(vehiculo, fechaInput, hora, notas, empleado);
             JOptionPane.showMessageDialog(this, "Entrada registrada exitosamente.", "Éxito",
                     JOptionPane.INFORMATION_MESSAGE);
             cargarVehiculos();
-            txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-            txtHora.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+            txtFecha.setText(ControladorSistema.getFechaActual());
+            txtHora.setText(ControladorSistema.getHoraActual());
             txtNotas.setText("");
             lblContrato.setText(" ");
         } catch (java.time.format.DateTimeParseException ex) {
